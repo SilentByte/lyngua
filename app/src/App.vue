@@ -6,10 +6,10 @@
 <template>
     <v-app>
         <v-app-bar app dark
-                   color="primary">
+                   color="primary"
+                   elevation="3">
             <v-toolbar-items>
-                <v-btn depressed
-                       color="primary"
+                <v-btn plain
                        to="/">
                     <div class="brand">
                         Lyngua

@@ -4,9 +4,61 @@
 -->
 
 <template>
-    <div>
-        HOME
-    </div>
+    <v-container fluid
+                 v-resize="onResize">
+        <v-row dense class="fill-height">
+            <v-col cols="6">
+                <v-row dense>
+                    <v-col cols="12">
+                        <v-card outlined
+                                :height="playerHeight">
+                            <iframe allowfullscreen
+                                    width="100%"
+                                    height="100%"
+                                    src="https://www.youtube-nocookie.com/embed/LseK5gp66u8?controls=0"
+                                    allow="autoplay; encrypted-media"
+                                    class="youtube-iframe">
+                            </iframe>
+                        </v-card>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-card outlined
+                                :height="controlsHeight">
+                            CONTROLS (?)
+                        </v-card>
+                    </v-col>
+                </v-row>
+            </v-col>
+
+            <v-col cols="6">
+                <v-card outlined
+                        class="slim-scrollbar transcript"
+                        :height="transcriptHeight">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean aliquet maximus leo luctus pharetra.
+                    Nullam id tincidunt metus, nec luctus dolor. Nulla ut dui ut enim tempor eleifend. Morbi diam nibh,
+                    ornare ut tellus in, venenatis accumsan ligula. Donec maximus, libero faucibus porta pellentesque,
+                    nisi orci tincidunt quam, eu gravida leo justo at lectus. Nullam vel euismod lacus, quis blandit
+                    lectus. Morbi tincidunt laoreet sodales. Duis magna erat, sollicitudin non elementum vitae,
+                    sollicitudin in neque.
+
+                    Nulla rhoncus ex ut sollicitudin iaculis. Sed nulla risus, convallis a tellus dictum, fringilla
+                    lobortis justo. Morbi vehicula sit amet risus sit amet porta. Mauris et gravida velit. Integer
+                    tristique enim ut erat blandit, non pharetra dui scelerisque. Suspendisse purus purus, ultrices
+                    vitae orci a, ultricies convallis nulla. Integer a erat eget purus pretium tincidunt et non mi.
+                    Curabitur sit amet nulla a lacus pellentesque fringilla in at felis. Aenean augue diam, fringilla
+                    sollicitudin magna nec, viverra euismod libero. Maecenas efficitur lorem ut mi commodo mollis.
+                    Pellentesque nec odio non lectus facilisis feugiat.
+
+                    Duis dui nunc, mollis id ante et, ornare tempus metus. Aliquam varius orci et urna iaculis, sed
+                    aliquet sem varius. Curabitur sollicitudin pulvinar arcu, sit amet posuere nisi suscipit in. Aenean
+                    ut tristique risus. Sed ligula erat, tincidunt nec fringilla sed, tempor vel erat. Duis a nibh a
+                    nulla gravida pharetra ac in ipsum. Curabitur vel odio suscipit, volutpat quam in, rutrum massa. In
+                    eget metus eget lorem euismod fermentum. Aenean venenatis viverra dapibus. Maecenas molestie tortor
+                    eu est blandit, non ultricies nunc ultrices. Aliquam eu odio vel ante consequat sodales.
+                </v-card>
+            </v-col>
+        </v-row>
+    </v-container>
 </template>
 
 <script lang="ts">
@@ -18,7 +70,31 @@ import {
 
 @Component
 export default class HomeView extends Vue {
-    //
+    private playerHeight = 400;
+    private controlsHeight = 400;
+    private transcriptHeight = 400;
+
+    private onResize() {
+        const height = window.innerHeight - 90;
+        this.playerHeight = 400;
+        this.controlsHeight = height - this.playerHeight - 8;
+        this.transcriptHeight = height;
+    }
 }
 
 </script>
+
+<style lang="scss" scoped>
+
+.youtube-iframe {
+    border: none;
+}
+
+.transcript {
+    padding: 10px 20px;
+    overflow-y: scroll;
+    font-size: 24px;
+    line-height: 2em;
+}
+
+</style>

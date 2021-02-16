@@ -6,6 +6,10 @@
 @import "variables";
 @import "transitions";
 
+html {
+    overflow-y: auto;
+}
+
 .text-primary {
     color: $primary-color;
 }
@@ -17,3 +21,20 @@
 .no-select {
     user-select: none;
 }
+
+.slim-scrollbar {
+    &::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background-color: $light-background-color;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: $disabled-color;
+        border-radius: 999px;
+        border: 2px solid $light-background-color;
+    }
+}
+
