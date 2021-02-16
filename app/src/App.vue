@@ -4,7 +4,48 @@
 -->
 
 <template>
-    <div id="app">
-        <router-view />
-    </div>
+    <v-app>
+        <v-app-bar app dark
+                   color="primary">
+            <v-toolbar-items>
+                <v-btn depressed
+                       color="primary"
+                       to="/">
+                    <div class="brand">
+                        Lyngua
+                    </div>
+                </v-btn>
+            </v-toolbar-items>
+        </v-app-bar>
+        <v-main>
+            <keep-alive>
+                <router-view />
+            </keep-alive>
+        </v-main>
+    </v-app>
 </template>
+
+<script lang="ts">
+
+import {
+    Component,
+    Vue,
+} from "vue-property-decorator";
+
+@Component
+export default class App extends Vue {
+    //
+}
+
+</script>
+
+<style lang="scss" scoped>
+
+.brand {
+    font-size: 26px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+</style>

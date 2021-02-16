@@ -1,0 +1,19 @@
+/*
+ * LYNGUA LANGUAGE LEARNING EXPERIENCE
+ * Copyright (c) 2021 by SilentByte <https://silentbyte.com/>
+ */
+
+@import "variables";
+@import "transitions";
+
+.text-primary {
+    color: $primary-color;
+}
+
+.text-accent {
+    color: $accent-color;
+}
+
+.no-select {
+    user-select: none;
+}

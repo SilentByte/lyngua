@@ -1,0 +1,14 @@
+/*
+ * LYNGUA LANGUAGE LEARNING EXPERIENCE
+ * Copyright (c) 2021 by SilentByte <https://silentbyte.com/>
+ */
+
+.quick-fade-transition {
+    &-enter-active, &-leave-active {
+        transition: opacity 0.2s;
+    }
+
+    &-enter, &-leave-to {
+        opacity: 0;
+    }
+}
