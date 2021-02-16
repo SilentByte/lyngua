@@ -7,7 +7,7 @@
     <v-container fluid
                  v-resize="onResize">
         <v-row dense class="fill-height">
-            <v-col cols="6">
+            <v-col cols="6" lg="5" xl="4">
                 <v-row dense>
                     <v-col cols="12">
                         <v-card outlined
@@ -30,7 +30,7 @@
                 </v-row>
             </v-col>
 
-            <v-col cols="6">
+            <v-col cols="6" lg="7" xl="8">
                 <v-card outlined
                         class="slim-scrollbar transcript"
                         :style="{ fontSize: `${24 * app.fontSize}px` }"
