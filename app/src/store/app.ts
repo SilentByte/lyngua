@@ -11,6 +11,7 @@ import {
 } from "vuex-module-decorators";
 
 import store from "@/store";
+import LocalStorage from "@/store/local-storage";
 
 VuexModuleDecoratorsConfig.rawError = true;
 
@@ -25,7 +26,7 @@ const FONT_SIZE_MIN = 0.5;
     name: "app",
 })
 export class AppModule extends VuexModule {
-    fontSize = 1;
+    fontSize = LocalStorage.fontSize || 1.0;
 
     get canDecreaseFontSize(): boolean {
         return this.fontSize > FONT_SIZE_MIN;
@@ -38,10 +39,12 @@ export class AppModule extends VuexModule {
     @Mutation
     increaseFontSize(): void {
         this.fontSize = Math.min(this.fontSize + FONT_SIZE_STEP, FONT_SIZE_MAX);
+        LocalStorage.fontSize = this.fontSize;
     }
 
     @Mutation
     decreaseFontSize(): void {
         this.fontSize = Math.max(this.fontSize - FONT_SIZE_STEP, FONT_SIZE_MIN);
+        LocalStorage.fontSize = this.fontSize;
     }
 }
