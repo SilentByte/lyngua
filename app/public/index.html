@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="<%= VUE_APP_ABSOLUTE_URL %>" />
+    <meta property="og:image" content="<%= VUE_APP_ABSOLUTE_URL %>og.png" />
+    <meta property="og:description" content="<%= VUE_APP_DESCRIPTION %>" />
+
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <link rel="apple-touch-icon" href="<%= BASE_URL %>apple-touch-icon.png">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+
+    <title><%= VUE_APP_TITLE %></title>
+
+    <style>
+        body {
+            background: #f4511e;
+            margin: 0;
+        }
+
+        .noscript {
+            margin-top: 5em;
+
+            font-family: Ubuntu, sans-serif;
+            font-size: 1.6rem;
+            line-height: 1.5em;
+            text-align: center;
+
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <noscript>
+        <div class="noscript">
+            We're sorry, but <%= VUE_APP_TITLE %> requires JavaScript to run. :-( <br />
+            Please adjust your browser settings accordingly.
+        </div>
+    </noscript>
+    <div id="app"></div>
+</body>
+</html>
