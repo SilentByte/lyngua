@@ -33,6 +33,7 @@
             <v-col cols="6">
                 <v-card outlined
                         class="slim-scrollbar transcript"
+                        :style="{ fontSize: `${24 * app.fontSize}px` }"
                         :height="transcriptHeight">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean aliquet maximus leo luctus pharetra.
                     Nullam id tincidunt metus, nec luctus dolor. Nulla ut dui ut enim tempor eleifend. Morbi diam nibh,
@@ -68,8 +69,13 @@ import {
     Vue,
 } from "vue-property-decorator";
 
+import { getModule } from "vuex-module-decorators";
+import { AppModule } from "@/store/app";
+
 @Component
 export default class HomeView extends Vue {
+    private readonly app = getModule(AppModule);
+
     private playerHeight = 400;
     private controlsHeight = 400;
     private transcriptHeight = 400;

@@ -16,6 +16,26 @@
                     </div>
                 </v-btn>
             </v-toolbar-items>
+
+            <v-spacer />
+
+            <div>
+                <v-btn icon
+                       :disabled="!app.canDecreaseFontSize"
+                       @click="app.decreaseFontSize()">
+                    <v-icon>
+                        mdi-format-font-size-decrease
+                    </v-icon>
+                </v-btn>
+
+                <v-btn icon
+                       :disabled="!app.canIncreaseFontSize"
+                       @click="app.increaseFontSize()">
+                    <v-icon>
+                        mdi-format-font-size-increase
+                    </v-icon>
+                </v-btn>
+            </div>
         </v-app-bar>
         <v-main>
             <keep-alive>
@@ -32,9 +52,12 @@ import {
     Vue,
 } from "vue-property-decorator";
 
+import { getModule } from "vuex-module-decorators";
+import { AppModule } from "@/store/app";
+
 @Component
 export default class App extends Vue {
-    //
+    private readonly app = getModule(AppModule);
 }
 
 </script>
