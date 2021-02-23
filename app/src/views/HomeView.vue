@@ -149,6 +149,11 @@ export default class HomeView extends Vue {
             ...nodes.map(n => n.parentElement).filter(n => n !== null),
         ].filter((n: any) => n.classList?.contains("word")) as typeof nodes;
 
+        // const range = [
+        //     first word offset,
+        //     last word offset + duration
+        // ] then play from -> to
+
         console.log(nodes);
         console.log("-----------------------------");
     }
@@ -227,7 +232,7 @@ export default class HomeView extends Vue {
     line-height: 2em;
 
     .word {
-        padding: 4px;
+        padding: 0.2em 0.1em;
         border: 2px solid transparent;
         border-radius: 4px;
 
