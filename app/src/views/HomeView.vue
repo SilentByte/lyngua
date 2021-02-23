@@ -33,16 +33,31 @@
             <v-col cols="6" lg="7" xl="8">
                 <v-card ref="transcript"
                         outlined
-                        class="slim-scrollbar transcript"
+                        class="slim-scrollbar transcript fill-height align-center justify-center align-content-center"
                         :style="{ fontSize: `${24 * app.fontSize}px` }"
                         :height="transcriptHeight">
-                    <span v-for="(w, i) in words" :key="i">{{ w }} </span>
+
+                    <template v-if="!transcription">
+                        <template v-for="i in 50">
+                            <v-skeleton-loader :key="i"
+                                               type="text"
+                                               height="1em"
+                                               :width="`${Math.random() * (95 - 70) + 70}%`" />
+                        </template>
+                    </template>
+
+                    <!-- Keep on one line because whitespace is relevant here. -->
+                    <template v-else v-for="w in transcription.words">
+                        <span :key="w.index" :data-index="w.index" class="word">{{ w.text }}</span>
+                        <span :key="`${w.index}-s`" class="space">{{ " " }}</span>
+                    </template>
                 </v-card>
             </v-col>
         </v-row>
     </v-container>
 </template>
 
+<!--suppress JSMethodCanBeStatic, JSUnusedGlobalSymbols -->
 <script lang="ts">
 
 import {
@@ -54,7 +69,12 @@ import {
 import rangy from "rangy";
 
 import { getModule } from "vuex-module-decorators";
-import { AppModule } from "@/store/app";
+import {
+    AppModule,
+    ITranscription,
+} from "@/store/app";
+
+// TODO: Make playback speed changeable.
 
 @Component
 export default class HomeView extends Vue {
@@ -65,29 +85,9 @@ export default class HomeView extends Vue {
     private playerHeight = 400;
     private controlsHeight = 400;
     private transcriptHeight = 400;
+    private selectionChangedNativeEvent!: () => void;
 
-    private words = `
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean aliquet maximus leo luctus pharetra.
-        Nullam id tincidunt metus, nec luctus dolor. Nulla ut dui ut enim tempor eleifend. Morbi diam nibh,
-        ornare ut tellus in, venenatis accumsan ligula. Donec maximus, libero faucibus porta pellentesque,
-        nisi orci tincidunt quam, eu gravida leo justo at lectus. Nullam vel euismod lacus, quis blandit
-        lectus. Morbi tincidunt laoreet sodales. Duis magna erat, sollicitudin non elementum vitae,
-        sollicitudin in neque.
-
-        Nulla rhoncus ex ut sollicitudin iaculis. Sed nulla risus, convallis a tellus dictum, fringilla
-        lobortis justo. Morbi vehicula sit amet risus sit amet porta. Mauris et gravida velit. Integer
-        tristique enim ut erat blandit, non pharetra dui scelerisque. Suspendisse purus purus, ultrices
-        vitae orci a, ultricies convallis nulla. Integer a erat eget purus pretium tincidunt et non mi.
-        Curabitur sit amet nulla a lacus pellentesque fringilla in at felis. Aenean augue diam, fringilla
-        sollicitudin magna nec, viverra euismod libero. Maecenas efficitur lorem ut mi commodo mollis.
-        Pellentesque nec odio non lectus facilisis feugiat.
-
-        Duis dui nunc, mollis id ante et, ornare tempus metus. Aliquam varius orci et urna iaculis, sed
-        aliquet sem varius. Curabitur sollicitudin pulvinar arcu, sit amet posuere nisi suscipit in. Aenean
-        ut tristique risus. Sed ligula erat, tincidunt nec fringilla sed, tempor vel erat. Duis a nibh a
-        nulla gravida pharetra ac in ipsum. Curabitur vel odio suscipit, volutpat quam in, rutrum massa. In
-        eget metus eget lorem euismod fermentum. Aenean venenatis viverra dapibus. Maecenas molestie tortor
-        eu est blandit, non ultricies nunc ultrices. Aliquam eu odio vel ante consequat sodales.`.split(/\s+/);
+    private transcription: ITranscription | null = null;
 
     private onResize() {
         const height = window.innerHeight - 90;
@@ -97,16 +97,30 @@ export default class HomeView extends Vue {
     }
 
     // TODO: Cross-reference with timestamps, implement IWord interface.
-    mounted(): void {
-        document.addEventListener("selectionchange", e => {
-            const nodes = rangy
-                .getSelection()
-                .getRangeAt(0)
-                .getNodes()
-                .filter(n => n.parentElement === (this.transcriptRef as any).$el);
+    private onSelectionChanged() {
+        let nodes: Array<Node | HTMLElement> = rangy
+            .getSelection()
+            .getAllRanges()
+            .flatMap(r => r.getNodes());
 
-            console.log(nodes);
-        });
+        nodes = [
+            ...nodes,
+            ...nodes.map(n => n.parentElement).filter(n => n !== null),
+        ].filter((n: any) => n.classList?.contains("word")) as typeof nodes;
+
+        console.log(nodes);
+        console.log("-----------------------------");
+    }
+
+    async mounted(): Promise<void> {
+        this.selectionChangedNativeEvent = () => this.onSelectionChanged();
+        document.addEventListener("selectionchange", this.selectionChangedNativeEvent);
+
+        this.transcription = await this.app.doTranscribe({youTubeVideoId: "LseK5gp66u8"});
+    }
+
+    beforeDestroy(): void {
+        document.removeEventListener("selectionchange", this.selectionChangedNativeEvent);
     }
 }
 
@@ -114,15 +128,29 @@ export default class HomeView extends Vue {
 
 <style lang="scss" scoped>
 
+@import "~@/styles/variables.scss";
+
 .youtube-iframe {
     border: none;
 }
 
 .transcript {
     padding: 10px 20px;
-    overflow-y: scroll;
+    overflow-y: auto;
     font-size: 24px;
     line-height: 2em;
+
+    .word {
+        padding: 4px;
+        border: 2px dotted transparent;
+        border-radius: 4px;
+
+        cursor: pointer;
+
+        &:hover {
+            border-color: $primary-color;
+        }
+    }
 }
 
 </style>
