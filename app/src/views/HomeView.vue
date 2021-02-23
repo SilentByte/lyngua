@@ -12,13 +12,12 @@
                     <v-col cols="12">
                         <v-card outlined
                                 :height="playerHeight">
-                            <iframe allowfullscreen
-                                    width="100%"
-                                    height="100%"
-                                    src="https://www.youtube-nocookie.com/embed/LseK5gp66u8?controls=0"
-                                    allow="autoplay; encrypted-media"
-                                    class="youtube-iframe">
-                            </iframe>
+                            <youtube ref="youtube"
+                                     nocookie
+                                     class="youtube-iframe"
+                                     video-id="LseK5gp66u8"
+                                     width="100%"
+                                     height="100%" />
                         </v-card>
                     </v-col>
                     <v-col cols="12">
