@@ -174,8 +174,12 @@ export default class HomeView extends Vue {
             this.wordRefByIndex(this.selectedWord.index)?.classList.remove("selected");
         }
 
-        this.wordRefByIndex(word.index)?.classList.add("selected");
-        this.selectedWord = word;
+        if(this.selectedWord !== word) {
+            this.wordRefByIndex(word.index)?.classList.add("selected");
+            this.selectedWord = word;
+        } else {
+            this.selectedWord = null;
+        }
     }
 
     private onPlayerReady() {
