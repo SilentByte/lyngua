@@ -34,7 +34,7 @@
                     </v-col>
                     <v-col cols="12">
                         <v-card outlined
-                                :height="controlsHeight">
+                                :height="infosHeight">
                             CONTROLS / DICTIONARY?
                             {{ selectedWord }}
                         </v-card>
@@ -43,31 +43,61 @@
             </v-col>
 
             <v-col cols="6" lg="7" xl="8">
-                <v-card ref="transcript"
-                        outlined
-                        class="slim-scrollbar transcript fill-height align-center justify-center align-content-center"
-                        :style="{ fontSize: `${24 * app.fontSize}px` }"
-                        :height="transcriptHeight">
+                <v-row dense>
+                    <v-col cols="12">
+                        <v-card ref="transcript"
+                                outlined
+                                class="slim-scrollbar transcript fill-height align-center justify-center align-content-center"
+                                :style="{ fontSize: `${24 * app.fontSize}px` }"
+                                :height="transcriptHeight">
 
-                    <template v-if="!transcription">
-                        <template v-for="i in 50">
-                            <v-skeleton-loader :key="i"
-                                               type="text"
-                                               height="1em"
-                                               :width="`${Math.random() * (95 - 70) + 70}%`" />
-                        </template>
-                    </template>
+                            <template v-if="!transcription">
+                                <template v-for="i in 50">
+                                    <v-skeleton-loader :key="i"
+                                                       type="text"
+                                                       height="1em"
+                                                       :width="`${Math.random() * (95 - 70) + 70}%`" />
+                                </template>
+                            </template>
 
-                    <!-- Keep on one line because whitespace is relevant here. -->
-                    <template v-else v-for="w in transcription.words">
+                            <!-- Keep on one line because whitespace is relevant here. -->
+                            <template v-else v-for="w in transcription.words">
                         <span :key="w.index"
                               :ref="`word-${w.index}`"
-                              :class="['word', (currentWord || {}).index === w.index ? 'active' : '']"
+                              :data-index="w.index"
+                              :class="[
+                                  'word',
+                                  (currentWord || {}).index === w.index ? 'active' : '',
+                                  (selectedWord || {}).index === w.index ? 'selected' : '',
+                              ]"
                               @click="onWordClick(w)"
                         >{{ w.text }}</span>
-                        <span :key="`${w.index}-s`" class="space">{{ " " }}</span>
-                    </template>
-                </v-card>
+                                <span :key="`${w.index}-s`" class="space">{{ " " }}</span>
+                            </template>
+                        </v-card>
+                    </v-col>
+
+                    <v-col cols="12">
+                        <v-card outlined
+                                class="pa-4"
+                                :height="controlsHeight">
+
+                            <v-btn large depressed
+                                   color="info"
+                                   :disabled="!selectedWord && !selectedRange"
+                                   @click="onPlay">
+                                <template v-if="currentPlayRange">
+                                    <v-icon left>mdi-pause</v-icon>
+                                    Pause Playback
+                                </template>
+                                <template v-else>
+                                    <v-icon left>mdi-play</v-icon>
+                                    {{ selectedRange ? "Play Selection" : "Play Word" }}
+                                </template>
+                            </v-btn>
+                        </v-card>
+                    </v-col>
+                </v-row>
             </v-col>
         </v-row>
     </v-container>
@@ -99,19 +129,24 @@ const PLAYER_TICK_INTERVAL = 100;
 
 @Component
 export default class HomeView extends Vue {
+    private readonly foo = true;
     private readonly app = getModule(AppModule);
 
     @Ref("transcript") private readonly transcriptRef!: HTMLElement;
 
     private playerHeight = 400;
-    private controlsHeight = 400;
+    private infosHeight = 400;
     private transcriptHeight = 400;
+    private controlsHeight = 78;
+
     private nativeSelectionChangedEvent!: () => void;
     private nativePlayerTickInterval!: number;
 
     private transcription: ITranscription | null = null;
     private currentWord: IWord | null = null;
     private selectedWord: IWord | null = null;
+    private selectedRange: [IWord, IWord] | null = null;
+    private currentPlayRange: [number, number] | null = null;
 
     private get player(): any {
         return (this.$refs.youtube as any).player;
@@ -144,12 +179,17 @@ export default class HomeView extends Vue {
     private onResize() {
         const height = window.innerHeight - 90;
         this.playerHeight = 400;
-        this.controlsHeight = height - this.playerHeight - 8;
-        this.transcriptHeight = height;
+        this.infosHeight = height - this.playerHeight - 8;
+        this.transcriptHeight = height - this.controlsHeight - 8;
     }
 
-    // TODO: Cross-reference with timestamps, implement IWord interface.
     private onSelectionChanged() {
+        if(!this.transcription) {
+            return;
+        }
+
+        this.currentPlayRange = null;
+
         let nodes: Array<Node | HTMLElement> = rangy
             .getSelection()
             .getAllRanges()
@@ -157,29 +197,27 @@ export default class HomeView extends Vue {
 
         nodes = [
             ...nodes,
-            ...nodes.map(n => n.parentElement).filter(n => n !== null),
+            ...nodes.map(n => n.parentElement).filter(n => !!n),
         ].filter((n: any) => n.classList?.contains("word")) as typeof nodes;
 
-        // const range = [
-        //     first word offset,
-        //     last word offset + duration
-        // ] then play from -> to
-
-        console.log(nodes);
-        console.log("-----------------------------");
+        this.selectedRange = nodes.length === 0 ? null : [
+            this.transcription.words[(nodes[0] as any).getAttribute("data-index")],
+            this.transcription.words[(nodes[nodes.length - 1] as any).getAttribute("data-index")],
+        ];
     }
 
     private onWordClick(word: IWord) {
-        if(this.selectedWord) {
-            this.wordRefByIndex(this.selectedWord.index)?.classList.remove("selected");
-        }
-
-        if(this.selectedWord !== word) {
-            this.wordRefByIndex(word.index)?.classList.add("selected");
-            this.selectedWord = word;
-        } else {
-            this.selectedWord = null;
-        }
+        this.selectedWord = this.selectedWord === word ? null : word;
+        // if(this.selectedWord) {
+        //     this.wordRefByIndex(this.selectedWord.index)?.classList.remove("selected");
+        // }
+        //
+        // if(this.selectedWord !== word) {
+        //     this.wordRefByIndex(word.index)?.classList.add("selected");
+        //     this.selectedWord = word;
+        // } else {
+        //     this.selectedWord = null;
+        // }
     }
 
     private onPlayerReady() {
@@ -216,6 +254,35 @@ export default class HomeView extends Vue {
 
         if(word) {
             this.currentWord = word;
+        }
+
+        if(this.currentPlayRange) {
+            const position = await this.player.getCurrentTime();
+            if(position > this.currentPlayRange[1]) {
+                this.currentPlayRange = null;
+                await this.player.pauseVideo();
+            }
+        }
+    }
+
+    private async playRange(offset: number, duration: number) {
+        this.currentPlayRange = [offset, duration];
+
+        await this.player.seekTo(offset);
+        await this.player.playVideo();
+    }
+
+    private async onPlay() {
+        if(this.currentPlayRange) {
+            this.currentPlayRange = null;
+            await this.player.pauseVideo();
+            return;
+        }
+
+        if(this.selectedRange) {
+            await this.playRange(this.selectedRange[0].offset, this.selectedRange[1].offset + this.selectedRange[1].duration);
+        } else if(this.selectedWord) {
+            await this.playRange(this.selectedWord.offset, this.selectedWord.offset + this.selectedWord.duration);
         }
     }
 
@@ -271,6 +338,10 @@ export default class HomeView extends Vue {
     .word.selected {
         color: $selected-color;
         border-color: $selected-color;
+    }
+
+    .word.selected.active {
+        color: $primary-color;
     }
 }
 
