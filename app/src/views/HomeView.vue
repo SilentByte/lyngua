@@ -34,9 +34,38 @@
                     </v-col>
                     <v-col cols="12">
                         <v-card outlined
-                                :height="infosHeight">
+                                :height="infoHeight">
                             CONTROLS / DICTIONARY?
                             {{ selectedWord }}
+                        </v-card>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-card outlined
+                                :height="creditsHeight">
+                            <div class="d-flex align-center fill-height">
+                                <v-btn x-small plain
+                                       color="primary"
+                                       href="https://twitter.com/RicoBeti"
+                                       target="_blank"
+                                       class="ms-2 text-none">
+                                    @RicoBeti
+                                </v-btn>
+
+                                <v-btn x-small plain
+                                       color="primary"
+                                       href="https://twitter.com/Phtevem"
+                                       target="_blank"
+                                       class="text-none">
+                                    @Phtevem
+                                </v-btn>
+
+                                <v-spacer />
+
+                                <v-btn x-small plain disabled
+                                       class="text-none">
+                                    Powered by Microsoft Azure
+                                </v-btn>
+                            </div>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -47,7 +76,7 @@
                     <v-col cols="12">
                         <v-card ref="transcript"
                                 outlined
-                                class="slim-scrollbar transcript fill-height align-center justify-center align-content-center"
+                                class="slim-scrollbar transcript"
                                 :style="{ fontSize: `${24 * app.fontSize}px` }"
                                 :height="transcriptHeight">
 
@@ -145,7 +174,8 @@ export default class HomeView extends Vue {
     @Ref("transcript") private readonly transcriptRef!: HTMLElement;
 
     private playerHeight = 400;
-    private infosHeight = 400;
+    private infoHeight = 400;
+    private creditsHeight = 28;
     private transcriptHeight = 400;
     private controlsHeight = 78;
 
@@ -189,7 +219,7 @@ export default class HomeView extends Vue {
     private onResize() {
         const height = window.innerHeight - 90;
         this.playerHeight = 400;
-        this.infosHeight = height - this.playerHeight - 8;
+        this.infoHeight = height - this.playerHeight - this.creditsHeight - 16;
         this.transcriptHeight = height - this.controlsHeight - 8;
     }
 
@@ -218,16 +248,6 @@ export default class HomeView extends Vue {
 
     private onWordClick(word: IWord) {
         this.selectedWord = this.selectedWord === word ? null : word;
-        // if(this.selectedWord) {
-        //     this.wordRefByIndex(this.selectedWord.index)?.classList.remove("selected");
-        // }
-        //
-        // if(this.selectedWord !== word) {
-        //     this.wordRefByIndex(word.index)?.classList.add("selected");
-        //     this.selectedWord = word;
-        // } else {
-        //     this.selectedWord = null;
-        // }
     }
 
     private onPlayerReady() {
