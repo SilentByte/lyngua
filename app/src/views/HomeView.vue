@@ -35,7 +35,8 @@
                     <v-col cols="12">
                         <v-card outlined
                                 :height="controlsHeight">
-                            CONTROLS (?)
+                            CONTROLS / DICTIONARY?
+                            {{ selectedWord }}
                         </v-card>
                     </v-col>
                 </v-row>
@@ -61,7 +62,7 @@
                     <template v-else v-for="w in transcription.words">
                         <span :key="w.index"
                               :ref="`word-${w.index}`"
-                              :class="['word', currentWordIndex === w.index ? 'active' : '']"
+                              :class="['word', (currentWord || {}).index === w.index ? 'active' : '']"
                               @click="onWordClick(w)"
                         >{{ w.text }}</span>
                         <span :key="`${w.index}-s`" class="space">{{ " " }}</span>
@@ -109,10 +110,20 @@ export default class HomeView extends Vue {
     private nativePlayerTickInterval!: number;
 
     private transcription: ITranscription | null = null;
-    private currentWordIndex: number | null = null;
+    private currentWord: IWord | null = null;
+    private selectedWord: IWord | null = null;
 
     private get player(): any {
         return (this.$refs.youtube as any).player;
+    }
+
+    private wordRefByIndex(index: number): HTMLElement | null {
+        const refs = this.$refs[`word-${index}`] as any[];
+        if(!refs || refs.length === 0) {
+            return null;
+        }
+
+        return refs[0] || null;
     }
 
     private findWordByOffset(offset: number): IWord | null {
@@ -159,7 +170,12 @@ export default class HomeView extends Vue {
     }
 
     private onWordClick(word: IWord) {
-        console.log(word);
+        if(this.selectedWord) {
+            this.wordRefByIndex(this.selectedWord.index)?.classList.remove("selected");
+        }
+
+        this.wordRefByIndex(word.index)?.classList.add("selected");
+        this.selectedWord = word;
     }
 
     private onPlayerReady() {
@@ -195,7 +211,7 @@ export default class HomeView extends Vue {
         const word = this.findWordByOffset(offset);
 
         if(word) {
-            this.currentWordIndex = word.index;
+            this.currentWord = word;
         }
     }
 
@@ -246,6 +262,11 @@ export default class HomeView extends Vue {
     .word.active {
         color: $primary-color;
         border-color: $primary-color;
+    }
+
+    .word.selected {
+        color: $selected-color;
+        border-color: $selected-color;
     }
 }
 
