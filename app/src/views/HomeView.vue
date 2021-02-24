@@ -62,16 +62,16 @@
 
                             <!-- Keep on one line because whitespace is relevant here. -->
                             <template v-else v-for="w in transcription.words">
-                        <span :key="w.index"
-                              :ref="`word-${w.index}`"
-                              :data-index="w.index"
-                              :class="[
-                                  'word',
-                                  (currentWord || {}).index === w.index ? 'active' : '',
-                                  (selectedWord || {}).index === w.index ? 'selected' : '',
-                              ]"
-                              @click="onWordClick(w)"
-                        >{{ w.text }}</span>
+                                <span :key="w.index"
+                                      :ref="`word-${w.index}`"
+                                      :data-index="w.index"
+                                      :class="[
+                                          'word',
+                                          (currentWord || {}).index === w.index ? 'active' : '',
+                                          (selectedWord || {}).index === w.index ? 'selected' : '',
+                                      ]"
+                                      @click="onWordClick(w)"
+                                >{{ w.text }}</span>
                                 <span :key="`${w.index}-s`" class="space">{{ " " }}</span>
                             </template>
                         </v-card>
@@ -83,6 +83,7 @@
                                 :height="controlsHeight">
 
                             <v-btn large depressed
+                                   width="200"
                                    color="info"
                                    :disabled="!selectedWord && !selectedRange"
                                    @click="onPlay">
@@ -94,6 +95,15 @@
                                     <v-icon left>mdi-play</v-icon>
                                     {{ selectedRange ? "Play Selection" : "Play Word" }}
                                 </template>
+                            </v-btn>
+
+                            <v-btn large depressed
+                                   width="200"
+                                   color="error"
+                                   class="ms-2"
+                                   :disabled="!selectedWord && !selectedRange">
+                                <v-icon left>mdi-record</v-icon>
+                                {{ selectedRange ? "Record Selection" : "Record Word" }}
                             </v-btn>
                         </v-card>
                     </v-col>
