@@ -22,6 +22,7 @@ export default new Vuetify({
                 info: "#2196f3",
                 success: "#4caf50",
                 warning: "#ffc107",
+                recording: "#ff5252",
             },
         },
     },

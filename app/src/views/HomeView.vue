@@ -130,7 +130,8 @@
                                    width="200"
                                    color="error"
                                    class="ms-2"
-                                   :disabled="!selectedWord && !selectedRange">
+                                   :disabled="!selectedWord && !selectedRange"
+                                   @click="onRecord">
                                 <v-icon left>mdi-record</v-icon>
                                 {{ selectedRange ? "Record Selection" : "Record Word" }}
                             </v-btn>
@@ -139,6 +140,8 @@
                 </v-row>
             </v-col>
         </v-row>
+
+        <RecordDialog ref="recordDialog" />
     </v-container>
 </template>
 
@@ -156,8 +159,11 @@ import rangy from "rangy";
 import { getModule } from "vuex-module-decorators";
 import {
     AppModule,
-    ITranscription, IWord,
+    ITranscription,
+    IWord,
 } from "@/store/app";
+
+import RecordDialog from "@/views/dialogs/RecordDialog.vue";
 
 const PLAYER_TICK_INTERVAL = 100;
 
@@ -165,12 +171,14 @@ const PLAYER_TICK_INTERVAL = 100;
 //       - Auto-scroll current word into view
 //       - When clicked/hovered on word, show FABs like 'go to (seek)', 'play', 'record'.
 //       - When words are selected, show FABs, e.g. 'play'. Then only play exactly this part.
-
-@Component
+@Component({
+    components: {RecordDialog},
+})
 export default class HomeView extends Vue {
     private readonly foo = true;
     private readonly app = getModule(AppModule);
 
+    @Ref("recordDialog") private readonly recordDialogRef!: RecordDialog;
     @Ref("transcript") private readonly transcriptRef!: HTMLElement;
 
     private playerHeight = 400;
@@ -316,6 +324,14 @@ export default class HomeView extends Vue {
         }
     }
 
+    private async onRecord() {
+        const words = this.selectedRange
+            ? this.transcription!.words.slice(this.selectedRange[0].index, this.selectedRange[1].index)
+            : [this.selectedWord!];
+
+        await this.recordDialogRef.show(words);
+    }
+
     async mounted(): Promise<void> {
         this.nativeSelectionChangedEvent = () => this.onSelectionChanged();
         this.nativePlayerTickInterval = setInterval(() => this.onPlayerTick(), PLAYER_TICK_INTERVAL) as unknown as number;
@@ -323,7 +339,6 @@ export default class HomeView extends Vue {
         document.addEventListener("selectionchange", this.nativeSelectionChangedEvent);
 
         this.transcription = await this.app.doTranscribe({youTubeVideoId: "LseK5gp66u8"});
-
     }
 
     beforeDestroy(): void {
