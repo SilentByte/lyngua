@@ -93,16 +93,24 @@
 
                             <!-- Keep on one line because whitespace is relevant here. -->
                             <template v-else v-for="w in transcription.words">
-                                <span :key="w.index"
-                                      :ref="`word-${w.index}`"
-                                      :data-index="w.index"
-                                      :class="[
+                                <v-tooltip bottom
+                                           :key="w.index"
+                                           :disabled="!w.score">
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <span :ref="`word-${w.index}`"
+                                              v-bind="attrs"
+                                              v-on="on"
+                                              :data-index="w.index"
+                                              :class="[
                                           'word',
                                           isWordActive(w) ? 'active' : '',
                                           isWordSelected(w) ? 'selected' : '',
-                                      ]"
-                                >{{ w.text }}</span>
-                                <span :key="`${w.index}-s`" class="space">{{ " " }}</span>
+                                          wordScoreClass(w),
+                                        ]">{{ w.text }}</span>
+                                        <span :key="`${w.index}-s`" class="space">{{ " " }}</span>
+                                    </template>
+                                    <span>{{ wordScoreText(w) }}</span>
+                                </v-tooltip>
                             </template>
                         </v-card>
                     </v-col>
@@ -177,7 +185,6 @@ const PLAYER_TICK_INTERVAL = 100;
     components: {RecordDialog},
 })
 export default class HomeView extends Vue {
-    private readonly foo = true;
     private readonly app = getModule(AppModule);
 
     @Ref("recordDialog") private readonly recordDialogRef!: RecordDialog;
@@ -212,6 +219,28 @@ export default class HomeView extends Vue {
 
         return word.index >= this.selectedRange[0].index
             && word.index <= this.selectedRange[1].index;
+    }
+
+    private wordScoreClass(word: IWord) {
+        return !word.score ? ""
+            : word.score.accuracy >= 0.8 ? "score-high"
+                : word.score.accuracy >= 0.5 ? "score-medium"
+                    : "score-low";
+    }
+
+    private wordScoreText(word: IWord) {
+        if(!word.score) {
+            return "";
+        }
+
+        const accuracy = Math.round(word.score.accuracy * 100);
+        if(word.score.error === "none") {
+            return `Pronunciation Score: ${accuracy}%`;
+        } else {
+            return word.score.error === "omission" ? "This is an omission"
+                : word.score.error === "insertion" ? "This is an insertion"
+                    : "This is a mispronunciation";
+        }
     }
 
     private findWordByOffset(offset: number): IWord | null {
@@ -259,11 +288,6 @@ export default class HomeView extends Vue {
                 this.transcription.words[(nodes[nodes.length - 1] as any).getAttribute("data-index")],
             ];
         }
-
-        // this.selectedRange = nodes.length === 0 ? null : [
-        //     this.transcription.words[(nodes[0] as any).getAttribute("data-index")],
-        //     this.transcription.words[(nodes[nodes.length - 1] as any).getAttribute("data-index")],
-        // ];
     }
 
     private onMouseDown(e: PointerEvent) {
@@ -362,6 +386,12 @@ export default class HomeView extends Vue {
         document.addEventListener("selectionchange", this.nativeSelectionChangedEvent);
 
         this.transcription = await this.app.doTranscribe({youTubeVideoId: "LseK5gp66u8"});
+        for(let i = 18; i < 67; i += 1) {
+            this.transcription.words[i].score = {
+                accuracy: Math.random(),
+                error: ["none", "omission", "insertion", "mispronunciation"][(Math.floor(Math.random() * 4))] as any,
+            };
+        }
     }
 
     beforeDestroy(): void {
@@ -391,29 +421,41 @@ export default class HomeView extends Vue {
         border: 2px solid transparent;
         border-radius: 4px;
         cursor: pointer;
-    }
 
-    .word:active {
-        cursor: text;
-    }
+        &:active {
+            cursor: text;
+        }
 
-    .word.active {
-        color: $primary-color;
-        border-color: $primary-color;
-    }
+        &.active {
+            color: $primary-color;
+            border-color: $primary-color;
+        }
 
-    .word.selected {
-        color: $selected-color;
-        border-color: $selected-color;
-    }
+        &.selected {
+            color: $selected-color;
+            border-color: $selected-color;
+        }
 
-    .word.selected.active {
-        color: $primary-color;
-    }
+        &.selected.active {
+            color: $primary-color;
+        }
 
-    .word:hover {
-        color: $primary-color;
-        border-color: $primary-color;
+        &:hover {
+            color: $primary-color;
+            border-color: $primary-color;
+        }
+
+        &.score-high {
+            text-decoration: $success-color underline auto;
+        }
+
+        &.score-medium {
+            text-decoration: $warning-color wavy underline from-font;
+        }
+
+        &.score-low {
+            text-decoration: $error-color wavy underline from-font;
+        }
     }
 
     & ::selection {
