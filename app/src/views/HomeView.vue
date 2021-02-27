@@ -447,14 +447,17 @@ export default class HomeView extends Vue {
 
         &.score-high {
             text-decoration: $success-color underline auto;
+            text-underline-offset: 0.1em;
         }
 
         &.score-medium {
             text-decoration: $warning-color wavy underline from-font;
+            text-underline-offset: 0.1em;
         }
 
         &.score-low {
             text-decoration: $error-color wavy underline from-font;
+            text-underline-offset: 0.1em;
         }
     }
 
