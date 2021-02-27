@@ -40,7 +40,7 @@ def _request_speech_token() -> str:
     return response.content.decode('utf-8')
 
 
-def _fetch_youtube_audio(video_id: str):
+def _fetch_youtube_audio(video_id: str) -> bytes:
     video_url = f'https://www.youtube.com/watch?v={video_id}'
     options = {
         'format': 'worstaudio/worst',
