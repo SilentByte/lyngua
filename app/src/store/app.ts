@@ -34,6 +34,10 @@ export interface IPronunciationScore {
     error: PronunciationError;
 }
 
+export function postpone<T>(handler: () => T): void {
+    setTimeout(handler, 0);
+}
+
 VuexModuleDecoratorsConfig.rawError = true;
 
 const FONT_SIZE_STEP = 0.05;
