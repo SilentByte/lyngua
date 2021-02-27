@@ -54,6 +54,38 @@ class ScoredWord:
     error: str
 
 
+def speech_to_text(wav_data: bytes) -> List[Word]:
+    token = _request_speech_token()
+    response = requests.post(
+        url="https://eastus.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed&wordLevelTimestamps=true&profanity=raw",
+        data=wav_data,
+        headers={
+            'Content-Type': 'audio/wav',
+            'Authorization': f'Bearer {token}',
+            'Accept': 'application/json',
+            'Ocp-Apim-Subscription-Key': settings.AZURE_SPEECH_API_KEY,
+        },
+    )
+
+    response.raise_for_status()
+    speech_data: dict = response.json()
+
+    log.info('Speech to Text API returned data', extra=speech_data)
+
+    if speech_data.get('RecognitionStatus') != 'Success':
+        raise LynguaError('Speech API returned an error')
+
+    return [
+        Word(
+            text=w['Word'],
+            display=w['Word'],  # TODO: Figure out a way to extract/correlate words with punctuation.
+            offset=w['Offset'] / 10_000_000,
+            duration=w['Duration'] / 10_000_000,
+        )
+        for w in speech_data['NBest'][0]['Words']
+    ]
+
+
 def score_pronunciation(reference_text: str, wav_data: bytes) -> List[ScoredWord]:
     token = _request_speech_token()
     assessment = {
@@ -78,7 +110,7 @@ def score_pronunciation(reference_text: str, wav_data: bytes) -> List[ScoredWord
     response.raise_for_status()
     score_data: dict = response.json()
 
-    log.info('Speech API returned data', extra=score_data)
+    log.info('Pronunciation Score API returned data', extra=score_data)
 
     if score_data.get('RecognitionStatus') != 'Success':
         raise LynguaError('Speech API returned an error')
