@@ -393,6 +393,10 @@ export default class HomeView extends Vue {
         cursor: pointer;
     }
 
+    .word:active {
+        cursor: text;
+    }
+
     .word.active {
         color: $primary-color;
         border-color: $primary-color;
