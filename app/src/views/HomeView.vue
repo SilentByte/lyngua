@@ -94,6 +94,7 @@
                             <!-- Keep on one line because whitespace is relevant here. -->
                             <template v-else v-for="w in transcription.words">
                                 <v-tooltip bottom
+                                           open-delay="400"
                                            :key="w.index"
                                            :disabled="!w.score">
                                     <template v-slot:activator="{ on, attrs }">
