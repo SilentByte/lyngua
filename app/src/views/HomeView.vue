@@ -30,6 +30,10 @@
                                      @buffering="onPlayerBuffering"
                                      @cued="onPlayerCued"
                                      @error="onPlayerError" />
+
+                            <v-overlay absolute
+                                       opacity="0.8"
+                                       :value="recording" />
                         </v-card>
                     </v-col>
                     <v-col cols="12">
@@ -204,6 +208,8 @@ export default class HomeView extends Vue {
     private currentWord: IWord | null = null;
     private selectedRange: [IWord, IWord] | null = null;
     private currentPlayRange: [number, number] | null = null;
+
+    private recording = false;
 
     private get player(): any {
         return (this.$refs.youtube as any).player;
