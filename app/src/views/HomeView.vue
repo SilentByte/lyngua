@@ -156,6 +156,7 @@
         </v-row>
 
         <RecordDialog ref="recordDialog" />
+        <VideoSelectionDialog ref="videoSelectionDialog" />
     </v-container>
 </template>
 
@@ -179,6 +180,7 @@ import {
 } from "@/store/app";
 
 import RecordDialog from "@/views/dialogs/RecordDialog.vue";
+import VideoSelectionDialog from "@/views/dialogs/VideoSelectionDialog.vue";
 
 const PLAYER_TICK_INTERVAL = 100;
 
@@ -187,12 +189,13 @@ const PLAYER_TICK_INTERVAL = 100;
 //       - When clicked/hovered on word, show FABs like 'go to (seek)', 'play', 'record'.
 //       - When words are selected, show FABs, e.g. 'play'. Then only play exactly this part.
 @Component({
-    components: {RecordDialog},
+    components: {VideoSelectionDialog, RecordDialog},
 })
 export default class HomeView extends Vue {
     private readonly app = getModule(AppModule);
 
     @Ref("recordDialog") private readonly recordDialogRef!: RecordDialog;
+    @Ref("videoSelectionDialog") private readonly videoSelectionDialogRef!: VideoSelectionDialog;
     @Ref("transcript") private readonly transcriptRef!: HTMLElement;
 
     private playerHeight = 400;
@@ -399,6 +402,8 @@ export default class HomeView extends Vue {
                 error: ["none", "omission", "insertion", "mispronunciation"][(Math.floor(Math.random() * 4))] as any,
             };
         }
+
+        this.videoSelectionDialogRef.show();
     }
 
     beforeDestroy(): void {
