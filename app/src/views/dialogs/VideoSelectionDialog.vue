@@ -68,8 +68,6 @@
                                         </template>
                                     </v-list-item>
 
-                                    {{ customVideoInfo }}
-
                                     <div :class="[
                                             'text-body-1',
                                             'text--secondary',
