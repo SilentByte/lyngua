@@ -3,6 +3,8 @@
  * Copyright (c) 2021 by SilentByte <https://silentbyte.com/>
  */
 
+import axios from "axios";
+
 import {
     VuexModule,
     Action,
@@ -35,12 +37,26 @@ export interface ITranscription {
     words: IWord[];
 }
 
+export interface IVideoInfo {
+    videoId: string;
+    canonicalUrl: string;
+    thumbnailUrl: string;
+    title: string;
+    author: string;
+}
+
 export function hint<T>(value: T): T {
     return value;
 }
 
 export function postpone<T>(handler: () => T): void {
     setTimeout(handler, 0);
+}
+
+export function extractYouTubeVideoIdFromUrl(url: string): string | null {
+    // See <https://gist.github.com/afeld/1254889>, forcing 10-12 characters.
+    const matches = /(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^?&"'>]{10,12})/.exec(url);
+    return matches === null ? null : matches[5];
 }
 
 VuexModuleDecoratorsConfig.rawError = true;
@@ -76,6 +92,23 @@ export class AppModule extends VuexModule {
     decreaseFontSize(): void {
         this.fontSize = Math.max(this.fontSize - FONT_SIZE_STEP, FONT_SIZE_MIN);
         LocalStorage.fontSize = this.fontSize;
+    }
+
+    @Action
+    async doFetchVideoInfo(payload: { youTubeVideoId: string }): Promise<IVideoInfo | null> {
+        const canonicalUrl = encodeURIComponent(`https://www.youtube.com/watch?v=${payload.youTubeVideoId}`);
+        try {
+            const response = await axios.get(`https://www.youtube.com/oembed?url=${canonicalUrl}&format=json`);
+            return {
+                videoId: payload.youTubeVideoId,
+                canonicalUrl,
+                thumbnailUrl: response.data?.thumbnail_url || "",
+                title: response.data?.title || "",
+                author: response.data?.author_name || "",
+            };
+        } catch(e) {
+            return null;
+        }
     }
 
     @Action
