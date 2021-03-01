@@ -68,6 +68,8 @@
                                         </template>
                                     </v-list-item>
 
+                                    {{ customVideoInfo }}
+
                                     <div :class="[
                                             'text-body-1',
                                             'text--secondary',
@@ -171,6 +173,34 @@ export default class VideoSelectionDialog extends Vue {
             thumbnailUrl: "https://i.ytimg.com/vi/TfVYxnhuEdU/hqdefault.jpg",
             title: "I asked an AI for video ideas, and they were actually good",
             author: "Tom Scott",
+        },
+        {
+            videoId: "OmCzZ-D8Wdk",
+            canonicalUrl: "https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DOmCzZ-D8Wdk",
+            thumbnailUrl: "https://i.ytimg.com/vi/OmCzZ-D8Wdk/hqdefault.jpg",
+            title: "Gimbal Lock and Apollo 13",
+            author: "The Vintage Space",
+        },
+        {
+            videoId: "O37yJBFRrfg",
+            canonicalUrl: "https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DO37yJBFRrfg",
+            thumbnailUrl: "https://i.ytimg.com/vi/O37yJBFRrfg/hqdefault.jpg",
+            title: "The European Union Explained*",
+            author: "CGP Grey",
+        },
+        {
+            videoId: "uxPdPpi5W4o",
+            canonicalUrl: "https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DuxPdPpi5W4o",
+            thumbnailUrl: "https://i.ytimg.com/vi/uxPdPpi5W4o/hqdefault.jpg",
+            title: "Why Are 96,000,000 Black Balls on This Reservoir?",
+            author: "Veritasium",
+        },
+        {
+            videoId: "Vxlci1d2rOg",
+            canonicalUrl: "https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DVxlci1d2rOg",
+            thumbnailUrl: "https://i.ytimg.com/vi/Vxlci1d2rOg/hqdefault.jpg",
+            title: "How They Did It - Pet Dogs in Ancient Rome",
+            author: "Invicta",
         },
     ];
 
