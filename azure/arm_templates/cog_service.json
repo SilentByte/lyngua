@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "accounts_MyAzureAPITestRicoAndStephen_name": {
+            "defaultValue": "MyAzureAPITestRicoAndStephen",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2017-04-18",
+            "name": "[parameters('accounts_MyAzureAPITestRicoAndStephen_name')]",
+            "location": "eastus",
+            "sku": {
+                "name": "F0"
+            },
+            "kind": "SpeechServices",
+            "properties": {
+                "privateEndpointConnections": [],
+                "publicNetworkAccess": "Enabled"
+            }
+        }
+    ]
+}
