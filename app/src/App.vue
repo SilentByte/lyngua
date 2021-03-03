@@ -19,6 +19,16 @@
 
             <v-spacer />
 
+            <v-toolbar-items>
+                <v-btn text
+                       @click="onStartNewSession">
+                    <v-icon small left>
+                        mdi-video-vintage
+                    </v-icon>
+                    New Session
+                </v-btn>
+            </v-toolbar-items>
+
             <div>
                 <v-btn icon
                        :disabled="!app.canDecreaseFontSize"
@@ -41,6 +51,8 @@
             <keep-alive>
                 <router-view />
             </keep-alive>
+
+            <VideoSelectionDialog ref="videoSelectionDialog" />
         </v-main>
     </v-app>
 </template>
@@ -49,15 +61,32 @@
 
 import {
     Component,
+    Ref,
     Vue,
 } from "vue-property-decorator";
 
 import { getModule } from "vuex-module-decorators";
 import { AppModule } from "@/store/app";
 
-@Component
+import VideoSelectionDialog from "@/views/dialogs/VideoSelectionDialog.vue";
+
+@Component({
+    components: {
+        VideoSelectionDialog,
+    },
+})
 export default class App extends Vue {
     private readonly app = getModule(AppModule);
+
+    @Ref("videoSelectionDialog") private readonly videoSelectionDialogRef!: VideoSelectionDialog;
+
+    private onStartNewSession() {
+        this.videoSelectionDialogRef.show();
+    }
+
+    async mounted(): Promise<void> {
+        this.onStartNewSession();
+    }
 }
 
 </script>

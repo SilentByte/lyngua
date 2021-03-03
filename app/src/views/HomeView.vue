@@ -12,7 +12,7 @@
                     <v-col cols="12">
                         <v-card outlined
                                 :height="playerHeight">
-                            <v-skeleton-loader v-if="!transcription"
+                            <v-skeleton-loader v-if="!app.videoId"
                                                type="image"
                                                class="image-skeleton-loader"
                                                height="100%" />
@@ -20,9 +20,9 @@
                             <youtube v-else
                                      ref="youtube"
                                      nocookie
-                                     video-id="LseK5gp66u8"
                                      width="100%"
                                      height="100%"
+                                     :video-id="app.videoId"
                                      @ready="onPlayerReady"
                                      @ended="onPlayerEnded"
                                      @playing="onPlayerPlaying"
@@ -86,7 +86,7 @@
                                 @pointerdown="onMouseDown"
                                 @pointerup="onMouseUp">
 
-                            <template v-if="!transcription">
+                            <template v-if="!app.transcription">
                                 <template v-for="i in 50">
                                     <v-skeleton-loader :key="i"
                                                        type="text"
@@ -96,7 +96,7 @@
                             </template>
 
                             <!-- Keep on one line because whitespace is relevant here. -->
-                            <template v-else v-for="w in transcription.words">
+                            <template v-else v-for="w in app.transcription.words">
                                 <v-tooltip bottom
                                            open-delay="400"
                                            :key="w.index"
@@ -154,9 +154,6 @@
                 </v-row>
             </v-col>
         </v-row>
-
-        <RecordDialog ref="recordDialog" />
-        <VideoSelectionDialog ref="videoSelectionDialog" />
     </v-container>
 </template>
 
@@ -174,13 +171,9 @@ import rangy from "rangy";
 import { getModule } from "vuex-module-decorators";
 import {
     AppModule,
-    ITranscription,
     IWord,
     postpone,
 } from "@/store/app";
-
-import RecordDialog from "@/views/dialogs/RecordDialog.vue";
-import VideoSelectionDialog from "@/views/dialogs/VideoSelectionDialog.vue";
 
 const PLAYER_TICK_INTERVAL = 100;
 
@@ -188,14 +181,10 @@ const PLAYER_TICK_INTERVAL = 100;
 //       - Auto-scroll current word into view
 //       - When clicked/hovered on word, show FABs like 'go to (seek)', 'play', 'record'.
 //       - When words are selected, show FABs, e.g. 'play'. Then only play exactly this part.
-@Component({
-    components: {VideoSelectionDialog, RecordDialog},
-})
+@Component
 export default class HomeView extends Vue {
     private readonly app = getModule(AppModule);
 
-    @Ref("recordDialog") private readonly recordDialogRef!: RecordDialog;
-    @Ref("videoSelectionDialog") private readonly videoSelectionDialogRef!: VideoSelectionDialog;
     @Ref("transcript") private readonly transcriptRef!: HTMLElement;
 
     private playerHeight = 400;
@@ -207,15 +196,15 @@ export default class HomeView extends Vue {
     private nativeSelectionChangedEvent!: () => void;
     private nativePlayerTickInterval!: number;
 
-    private transcription: ITranscription | null = null;
+    // TODO: Move out into Vuex.
     private currentWord: IWord | null = null;
     private selectedRange: [IWord, IWord] | null = null;
     private currentPlayRange: [number, number] | null = null;
 
     private recording = false;
 
-    private get player(): any {
-        return (this.$refs.youtube as any).player;
+    private player(): Record<string, any> | null {
+        return (this.$refs.youtube as any)?.player || null;
     }
 
     private isWordActive(word: IWord) {
@@ -254,11 +243,11 @@ export default class HomeView extends Vue {
     }
 
     private findWordByOffset(offset: number): IWord | null {
-        if(!this.transcription) {
+        if(!this.app.transcription) {
             return null;
         }
 
-        const words = this.transcription.words;
+        const words = this.app.transcription.words;
         for(let i = 0; i < words.length; i += 1) {
             if(words[i].offset > offset) {
                 return words[i - 1];
@@ -276,7 +265,7 @@ export default class HomeView extends Vue {
     }
 
     private onSelectionChanged() {
-        if(!this.transcription) {
+        if(!this.app.transcription) {
             return;
         }
 
@@ -294,8 +283,8 @@ export default class HomeView extends Vue {
 
         if(nodes.length > 0) {
             this.selectedRange = [
-                this.transcription.words[(nodes[0] as any).getAttribute("data-index")],
-                this.transcription.words[(nodes[nodes.length - 1] as any).getAttribute("data-index")],
+                this.app.transcription.words[(nodes[0] as any).getAttribute("data-index")],
+                this.app.transcription.words[(nodes[nodes.length - 1] as any).getAttribute("data-index")],
             ];
         }
     }
@@ -342,7 +331,12 @@ export default class HomeView extends Vue {
     }
 
     private async onPlayerTick() {
-        const offset = await this.player.getCurrentTime();
+        const player = this.player();
+        if(!player) {
+            return;
+        }
+
+        const offset = await player.getCurrentTime();
         const word = this.findWordByOffset(offset);
 
         if(word) {
@@ -350,10 +344,10 @@ export default class HomeView extends Vue {
         }
 
         if(this.currentPlayRange) {
-            const position = await this.player.getCurrentTime();
+            const position = await player.getCurrentTime();
             if(position > this.currentPlayRange[1]) {
                 this.currentPlayRange = null;
-                await this.player.pauseVideo();
+                await player.pauseVideo();
             }
         }
     }
@@ -361,14 +355,14 @@ export default class HomeView extends Vue {
     private async playRange(offset: number, duration: number) {
         this.currentPlayRange = [offset, duration];
 
-        await this.player.seekTo(offset);
-        await this.player.playVideo();
+        await this.player()?.seekTo(offset);
+        await this.player()?.playVideo();
     }
 
     private async onPlay() {
         if(this.currentPlayRange) {
             this.currentPlayRange = null;
-            await this.player.pauseVideo();
+            await this.player()?.pauseVideo();
             return;
         }
 
@@ -385,8 +379,8 @@ export default class HomeView extends Vue {
             return;
         }
 
-        const words = this.transcription!.words.slice(this.selectedRange[0].index, this.selectedRange[1].index);
-        await this.recordDialogRef.show(words);
+        // TODO: Implement.
+        // const words = this.app.transcription!.words.slice(this.selectedRange[0].index, this.selectedRange[1].index);
     }
 
     async mounted(): Promise<void> {
@@ -394,16 +388,6 @@ export default class HomeView extends Vue {
         this.nativePlayerTickInterval = setInterval(() => this.onPlayerTick(), PLAYER_TICK_INTERVAL) as unknown as number;
 
         document.addEventListener("selectionchange", this.nativeSelectionChangedEvent);
-
-        this.transcription = await this.app.doTranscribe({youTubeVideoId: "LseK5gp66u8"});
-        for(let i = 18; i < 67; i += 1) {
-            this.transcription.words[i].score = {
-                accuracy: Math.random(),
-                error: ["none", "omission", "insertion", "mispronunciation"][(Math.floor(Math.random() * 4))] as any,
-            };
-        }
-
-        this.videoSelectionDialogRef.show();
     }
 
     beforeDestroy(): void {
