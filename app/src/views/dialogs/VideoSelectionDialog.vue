@@ -124,7 +124,7 @@
 
                     <v-btn depressed
                            class="mx-2"
-                           :disabled="pending"
+                           :disabled="!app.videoId || pending"
                            @click="onCancel">
                         Cancel
                     </v-btn>
