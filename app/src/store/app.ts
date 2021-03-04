@@ -77,6 +77,8 @@ export class AppModule extends VuexModule {
     videoId: string | null = null;
     transcription: ITranscription | null = null;
 
+    recording = false;
+
     get canDecreaseFontSize(): boolean {
         return this.fontSize > FONT_SIZE_MIN;
     }
@@ -105,6 +107,11 @@ export class AppModule extends VuexModule {
     @Mutation
     setTranscription(transcription: ITranscription): void {
         this.transcription = transcription;
+    }
+
+    @Mutation
+    setRecording(recording: boolean): void {
+        this.recording = recording;
     }
 
     @Action
@@ -144,5 +151,10 @@ export class AppModule extends VuexModule {
                 },
             })),
         }));
+    }
+
+    @Action
+    async doStartRecording(): Promise<void> {
+        this.context.commit("setRecording", true);
     }
 }

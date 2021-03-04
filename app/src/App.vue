@@ -21,6 +21,7 @@
 
             <v-toolbar-items>
                 <v-btn text
+                       :disabled="app.recording"
                        @click="onStartNewSession">
                     <v-icon small left>
                         mdi-video-vintage

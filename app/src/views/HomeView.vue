@@ -33,7 +33,7 @@
 
                             <v-overlay absolute
                                        opacity="0.8"
-                                       :value="recording" />
+                                       :value="app.recording" />
                         </v-card>
                     </v-col>
                     <v-col cols="12">
@@ -41,6 +41,10 @@
                                 :height="infoHeight">
                             CONTROLS / DICTIONARY?
                             {{ selectedRange }}
+
+                            <v-overlay absolute
+                                       opacity="0.8"
+                                       :value="app.recording" />
                         </v-card>
                     </v-col>
                     <v-col cols="12">
@@ -100,7 +104,7 @@
                                 <v-tooltip bottom
                                            open-delay="400"
                                            :key="w.index"
-                                           :disabled="!w.score">
+                                           :disabled="!w.score || app.recording">
                                     <template v-slot:activator="{ on, attrs }">
                                         <span :ref="`word-${w.index}`"
                                               v-bind="attrs"
@@ -110,6 +114,7 @@
                                           'word',
                                           isWordActive(w) ? 'active' : '',
                                           isWordSelected(w) ? 'selected' : '',
+                                          app.recording && !isWordSelected(w) ? 'disabled' : '',
                                           wordScoreClass(w),
                                         ]">{{ w.text }}</span>
                                         <span :key="`${w.index}-s`" class="space">{{ " " }}</span>
@@ -122,14 +127,14 @@
 
                     <v-col cols="12">
                         <v-card outlined
-                                class="pa-4"
+                                class="pa-4 d-flex align-center"
                                 :height="controlsHeight">
 
                             <v-btn large depressed
                                    width="200"
                                    color="info"
-                                   :disabled="!selectedRange"
-                                   @click="onPlay">
+                                   :disabled="!selectedRange || app.recording"
+                                   @click="onPlayOrPause">
                                 <template v-if="currentPlayRange">
                                     <v-icon left>mdi-pause</v-icon>
                                     Pause Playback
@@ -143,12 +148,29 @@
                             <v-btn large depressed
                                    width="200"
                                    color="error"
-                                   class="ms-2"
+                                   class="mx-2"
                                    :disabled="!selectedRange"
-                                   @click="onRecord">
-                                <v-icon left>mdi-record</v-icon>
-                                Record Selection
+                                   @click="onRecordOrStop">
+                                <template v-if="app.recording">
+                                    <v-icon left>mdi-stop</v-icon>
+                                    Stop Recording
+                                </template>
+                                <template v-else>
+                                    <v-icon left>mdi-record</v-icon>
+                                    Record Selection
+                                </template>
                             </v-btn>
+
+                            <v-progress-linear rounded
+                                               color="recording"
+                                               height="16"
+                                               value="80"
+                                               class="d-inline-flex"
+                                               style="width: 150px" />
+
+                            <div class="ms-2 text-caption">
+                                0/60s
+                            </div>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -201,8 +223,6 @@ export default class HomeView extends Vue {
     private selectedRange: [IWord, IWord] | null = null;
     private currentPlayRange: [number, number] | null = null;
 
-    private recording = false;
-
     private player(): Record<string, any> | null {
         return (this.$refs.youtube as any)?.player || null;
     }
@@ -221,7 +241,7 @@ export default class HomeView extends Vue {
     }
 
     private wordScoreClass(word: IWord) {
-        return !word.score ? ""
+        return this.app.recording || !word.score ? ""
             : word.score.accuracy >= 0.8 ? "score-high"
                 : word.score.accuracy >= 0.5 ? "score-medium"
                     : "score-low";
@@ -265,7 +285,7 @@ export default class HomeView extends Vue {
     }
 
     private onSelectionChanged() {
-        if(!this.app.transcription) {
+        if(!this.app.transcription || this.app.recording) {
             return;
         }
 
@@ -359,7 +379,7 @@ export default class HomeView extends Vue {
         await this.player()?.playVideo();
     }
 
-    private async onPlay() {
+    private async onPlayOrPause() {
         if(this.currentPlayRange) {
             this.currentPlayRange = null;
             await this.player()?.pauseVideo();
@@ -374,10 +394,13 @@ export default class HomeView extends Vue {
         }
     }
 
-    private async onRecord() {
+    private async onRecordOrStop() {
         if(!this.selectedRange) {
             return;
         }
+
+        await this.app.doStartRecording();
+        this.player()?.pauseVideo();
 
         // TODO: Implement.
         // const words = this.app.transcription!.words.slice(this.selectedRange[0].index, this.selectedRange[1].index);
@@ -434,6 +457,10 @@ export default class HomeView extends Vue {
 
         &.selected.active {
             color: $primary-color;
+        }
+
+        &.disabled {
+            color: $bleached-color;
         }
 
         &:hover {
