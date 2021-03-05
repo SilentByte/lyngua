@@ -82,7 +82,8 @@ export default class App extends Vue {
     @Ref("videoSelectionDialog") private readonly videoSelectionDialogRef!: VideoSelectionDialog;
 
     private onStartNewSession() {
-        this.videoSelectionDialogRef.show();
+        // this.videoSelectionDialogRef.show();
+        this.app.doTranscribe({youTubeVideoId: "h4T_LlK1VE4"});
     }
 
     async mounted(): Promise<void> {

@@ -161,16 +161,26 @@
                                 </template>
                             </v-btn>
 
-                            <v-progress-linear rounded
-                                               color="recording"
-                                               height="16"
-                                               value="80"
-                                               class="d-inline-flex"
-                                               style="width: 150px" />
+                            <template v-if="!app.hasRecordingPermission">
+                                <div class="text-caption text--secondary">
+                                    <v-icon small color="info">
+                                        mdi-information-outline
+                                    </v-icon>
+                                    Please give Lyngua permission to use your microphone.
+                                </div>
+                            </template>
+                            <template v-else-if="app.recording">
+                                <v-progress-linear rounded
+                                                   color="recording"
+                                                   height="16"
+                                                   class="d-inline-flex"
+                                                   style="width: 150px"
+                                                   :value="app.recordingPeak * 100" />
 
-                            <div class="ms-2 text-caption">
-                                0/60s
-                            </div>
+                                <div class="ms-2 text-caption">
+                                    0/60s
+                                </div>
+                            </template>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -395,15 +405,18 @@ export default class HomeView extends Vue {
     }
 
     private async onRecordOrStop() {
+        if(this.app.recording) {
+            const blob = await this.app.doStopRecording();
+            console.log(blob);
+            return;
+        }
+
         if(!this.selectedRange) {
             return;
         }
 
-        await this.app.doStartRecording();
         this.player()?.pauseVideo();
-
-        // TODO: Implement.
-        // const words = this.app.transcription!.words.slice(this.selectedRange[0].index, this.selectedRange[1].index);
+        await this.app.doStartRecording();
     }
 
     async mounted(): Promise<void> {
