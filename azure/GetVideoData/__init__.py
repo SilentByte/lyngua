@@ -1,6 +1,12 @@
 import logging
 import azure.functions as func
+from json import dumps
 import re
+from src import blob, audio
+from src.cognitive import SpeechAPI
+
+cognitive_api = SpeechAPI()
+
 def strip_video(video_url:str) -> str:
     """ pull out video code from url, eg 
     https://youtu.be/XnYaTgv7eMA?t=35 becomes XnYaTgv7eMA
@@ -16,9 +22,14 @@ def strip_video(video_url:str) -> str:
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Python HTTP trigger function processed a request.')
     video = req.params.get('v')
-    return func.HttpResponse(
-        f'video is {strip_video(video)}',
-            status_code=200
-    )
+    logging.info(f'Python HTTP trigger function processed a request. video {video}')
+    # Lots of possible video formats
+    video_code = strip_video(video)
+    logging.info(f'Video code {video_code}')
+    data = blob.get_blob(video)
+    if data is None:
+        audio =audio.fetch_youtube_audio(video_code)
+        data = cognitive_api.speech_to_text(audio)
+        blob.insert_blob(blobname=video_code,file=data)
+    return func.HttpResponse(status_code=200,body=dumps(data))
