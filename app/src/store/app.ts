@@ -165,10 +165,7 @@ export class AppModule extends VuexModule {
                 display: w.Word,
                 offset: w.Offset / 10_000_000,
                 duration: w.Duration / 10_000_000,
-                score: {
-                    accuracy: Math.random(),
-                    error: ["none", "omission", "insertion", "mispronunciation"][(Math.floor(Math.random() * 4))] as any,
-                },
+                score: null,
             })),
         }));
     }

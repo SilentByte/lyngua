@@ -213,7 +213,7 @@ import {
 } from "@/store/app";
 
 const PLAYER_TICK_INTERVAL_MS = 100;
-const MAX_RECORDING_TIMEOUT_MS = 10_000; // TODO: 60_000;
+const MAX_RECORDING_TIMEOUT_MS = 30_000;
 
 // TODO: - Make playback speed changeable
 //       - Auto-scroll current word into view
@@ -421,7 +421,15 @@ export default class HomeView extends Vue {
         const blob = await this.app.doStopRecording();
         console.log(blob);
 
-        // TODO: Upload.
+        // TODO: Upload, along with selected text as 'source of truth'.
+        // TODO: Implement proper scoring; do this in Vuex mutation.
+        const [start, end] = [this.selectedRange![0].index, this.selectedRange![1].index];
+        for(let i = start; i <= end; i += 1) {
+            this.app.transcription!.words[i].score = {
+                accuracy: Math.random(),
+                error: ["none", "omission", "insertion", "mispronunciation"][(Math.floor(Math.random() * 4))] as any,
+            };
+        }
     }
 
     private async onPlayOrPause() {
