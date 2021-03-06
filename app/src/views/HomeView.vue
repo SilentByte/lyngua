@@ -111,12 +111,12 @@
                                               v-on="on"
                                               :data-index="w.index"
                                               :class="[
-                                          'word',
-                                          isWordActive(w) ? 'active' : '',
-                                          isWordSelected(w) ? 'selected' : '',
-                                          app.recording && !isWordSelected(w) ? 'disabled' : '',
-                                          wordScoreClass(w),
-                                        ]">{{ w.text }}</span>
+                                                  'word',
+                                                  isWordActive(w) ? 'active' : '',
+                                                  isWordSelected(w) ? 'selected' : '',
+                                                  app.recording && !isWordSelected(w) ? 'disabled' : '',
+                                                  wordScoreClass(w),
+                                              ]">{{ w.text }}</span>
                                         <span :key="`${w.index}-s`" class="space">{{ " " }}</span>
                                     </template>
                                     <span>{{ wordScoreText(w) }}</span>
@@ -177,9 +177,14 @@
                                                    style="width: 150px"
                                                    :value="app.recordingPeak * 100" />
 
-                                <div class="ms-2 text-caption">
-                                    0/60s
-                                </div>
+                                <v-progress-circular color="recording"
+                                                     size="35"
+                                                     class="ms-2 d-inline-flex"
+                                                     :value="recordingDurationPercentage">
+                                    <div class="text-caption text--secondary">
+                                        {{ Math.round(recordingDuration) }}
+                                    </div>
+                                </v-progress-circular>
                             </template>
                         </v-card>
                     </v-col>
@@ -207,7 +212,8 @@ import {
     postpone,
 } from "@/store/app";
 
-const PLAYER_TICK_INTERVAL = 100;
+const PLAYER_TICK_INTERVAL_MS = 100;
+const MAX_RECORDING_TIMEOUT_MS = 10_000; // TODO: 60_000;
 
 // TODO: - Make playback speed changeable
 //       - Auto-scroll current word into view
@@ -226,12 +232,20 @@ export default class HomeView extends Vue {
     private controlsHeight = 78;
 
     private nativeSelectionChangedEvent!: () => void;
-    private nativePlayerTickInterval!: number;
+    private nativeTickInterval = 0;
+    private nativeRecordingTimeout = 0;
 
     // TODO: Move out into Vuex.
     private currentWord: IWord | null = null;
     private selectedRange: [IWord, IWord] | null = null;
     private currentPlayRange: [number, number] | null = null;
+
+    private recordingStartTimestamp = 0;
+    private recordingDuration = 0;
+
+    private get recordingDurationPercentage() {
+        return this.recordingDuration / (MAX_RECORDING_TIMEOUT_MS / 1000) * 100;
+    }
 
     private player(): Record<string, any> | null {
         return (this.$refs.youtube as any)?.player || null;
@@ -360,7 +374,9 @@ export default class HomeView extends Vue {
         console.log("onPlayerError");
     }
 
-    private async onPlayerTick() {
+    private async onTick() {
+        this.recordingDuration = (Date.now() - this.recordingStartTimestamp) / 1000;
+
         const player = this.player();
         if(!player) {
             return;
@@ -389,6 +405,25 @@ export default class HomeView extends Vue {
         await this.player()?.playVideo();
     }
 
+    private async startRecording() {
+        this.player()?.pauseVideo();
+        await this.app.doStartRecording();
+
+        this.nativeRecordingTimeout = setTimeout(() => this.stopRecording(), MAX_RECORDING_TIMEOUT_MS) as unknown as number;
+        this.recordingStartTimestamp = Date.now();
+        this.recordingDuration = 0;
+    }
+
+    private async stopRecording() {
+        clearTimeout(this.nativeRecordingTimeout);
+        this.nativeRecordingTimeout = 0;
+
+        const blob = await this.app.doStopRecording();
+        console.log(blob);
+
+        // TODO: Upload.
+    }
+
     private async onPlayOrPause() {
         if(this.currentPlayRange) {
             this.currentPlayRange = null;
@@ -406,8 +441,7 @@ export default class HomeView extends Vue {
 
     private async onRecordOrStop() {
         if(this.app.recording) {
-            const blob = await this.app.doStopRecording();
-            console.log(blob);
+            await this.stopRecording();
             return;
         }
 
@@ -415,20 +449,20 @@ export default class HomeView extends Vue {
             return;
         }
 
-        this.player()?.pauseVideo();
-        await this.app.doStartRecording();
+        await this.startRecording();
     }
 
     async mounted(): Promise<void> {
         this.nativeSelectionChangedEvent = () => this.onSelectionChanged();
-        this.nativePlayerTickInterval = setInterval(() => this.onPlayerTick(), PLAYER_TICK_INTERVAL) as unknown as number;
+        this.nativeTickInterval = setInterval(() => this.onTick(), PLAYER_TICK_INTERVAL_MS) as unknown as number;
 
         document.addEventListener("selectionchange", this.nativeSelectionChangedEvent);
     }
 
     beforeDestroy(): void {
         document.removeEventListener("selectionchange", this.nativeSelectionChangedEvent);
-        clearInterval(this.nativePlayerTickInterval);
+        clearInterval(this.nativeTickInterval);
+        clearTimeout(this.nativeRecordingTimeout);
     }
 }
 

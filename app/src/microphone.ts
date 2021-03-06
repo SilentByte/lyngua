@@ -93,7 +93,7 @@ export class Recorder {
     }
 
     private createAudioProcessor() {
-        const processor = this.context.createScriptProcessor(256, 1, 1);
+        const processor = this.context.createScriptProcessor(8192, 1, 1);
 
         processor.addEventListener("audioprocess", this.onProcessAudio.bind(this));
         processor.connect(this.context.destination);
@@ -140,6 +140,8 @@ export class Recorder {
 
     private encode() {
         const buffer = this.mergeSampleBuffers();
+        console.log(buffer.length);
+
         const blob = new ArrayBuffer(44 + buffer.length * 2);
         const view = new DataView(blob);
         const writer = new DataWriter(view);
