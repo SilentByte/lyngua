@@ -5,3 +5,4 @@ youtube-dl==2021.2.22
 azure-functions==1.6.0
 azure-storage-blob==12.8.0
 ffmpeg
+pydantic

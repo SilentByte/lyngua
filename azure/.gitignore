@@ -6,3 +6,7 @@ dev_test/
 
 .env
 
+
+local.settings.json
+.python_packages
+.venv
