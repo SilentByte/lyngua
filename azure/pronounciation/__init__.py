@@ -1,24 +1,20 @@
 import logging
 
 import azure.functions as func
+from src.cognitive import SpeechAPI
+from json import loads, dumps
+import base64
+
+api = SpeechAPI()
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Python HTTP trigger function processed a request.')
+    body = loads(req.get_json().decode('utf-8'))
+    data = body.get('data')
+    words = body.get('words')
+    response = api.speech_to_prounounciation(base64.decode(data, 'utf-8').encode('utf-8'), words=words)
 
-    name = req.params.get('name')
-    if not name:
-        try:
-            req_body = req.get_json()
-        except ValueError:
-            pass
-        else:
-            name = req_body.get('name')
-
-    if name:
-        return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
-    else:
-        return func.HttpResponse(
-             "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
-             status_code=200
-        )
+    return func.HttpResponse(
+        response,
+        status_code=200
+    )
