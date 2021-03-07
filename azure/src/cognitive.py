@@ -47,7 +47,7 @@ class SpeechAPI():  # Basics, transforming should be done in the azure function 
         header = self.base_header.copy()
         header['Content-Type'] = 'audio/wav'
         response = requests.post(
-            url=f"{self.endpoint}/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed",
+            url=f"{self.endpoint}/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed&wordLevelTimestamps=true&profanity=raw",
             data=wav_data, headers=header)
         response.raise_for_status()
         return SpeechToTextResponse(**response.json())

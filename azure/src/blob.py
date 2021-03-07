@@ -5,7 +5,7 @@ import ffmpeg
 from src.settings import AZURE_STORAGE_CONNECTION_STRING, AZURE_STORAGE_CONTAINER, AUDIO_MAX_LENGTH
 from typing import Optional
 from io import BytesIO
-from json import load, dumps
+from json import load,loads,dumps
 
 Storage = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
 # Force container creation
@@ -51,7 +51,8 @@ def get_blob(blobname: str) -> Optional[dict]:
         tmp_bytes = BytesIO()
         tmp_bytes.write(blob.download_blob().readall())
         tmp_bytes.seek(0)
-        return load(tmp_bytes)
+        data = load(tmp_bytes)
+        return loads(data)
     return None
 
 

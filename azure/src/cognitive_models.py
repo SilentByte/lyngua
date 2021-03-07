@@ -10,12 +10,19 @@ class _AudioWords(BaseModel):
     ErrorType: str
 
 
+class _STTWords(BaseModel):
+    Word: str
+    Offset: int
+    Duration: int
+
+
 class _STTNBest(BaseModel):
     Confidence: float
     Lexical: str
     ITN: str
     MaskedITN: str
     Display: str
+    Words: List[_STTWords]
 
 
 class _PronounceNBest(BaseModel):  # Basically what gets returned from STT but includes a word list
@@ -23,10 +30,10 @@ class _PronounceNBest(BaseModel):  # Basically what gets returned from STT but i
     ITN: str
     MaskedITN: str
     Display: str
-    AccuracyScore:str
-    FluencyScore:float
-    CompletenessScore:float
-    PronScore:float
+    AccuracyScore: str
+    FluencyScore: float
+    CompletenessScore: float
+    PronScore: float
     Words: List[_AudioWords]
 
 
