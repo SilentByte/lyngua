@@ -54,6 +54,17 @@ export function postpone<T>(handler: () => T): void {
     setTimeout(handler, 0);
 }
 
+export function blobToDataUrl(data: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => resolve(reader.result as string || "");
+        reader.onerror = () => reject();
+
+        reader.readAsArrayBuffer(data);
+    });
+}
+
 export function extractYouTubeVideoIdFromUrl(url: string): string | null {
     // See <https://gist.github.com/afeld/1254889>, forcing 10-12 characters.
     const matches = /(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^?&"'>]{10,12})/.exec(url);

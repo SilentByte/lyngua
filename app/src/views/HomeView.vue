@@ -209,6 +209,7 @@ import { getModule } from "vuex-module-decorators";
 import {
     AppModule,
     IWord,
+    blobToDataUrl,
     postpone,
 } from "@/store/app";
 
@@ -420,6 +421,10 @@ export default class HomeView extends Vue {
 
         const blob = await this.app.doStopRecording();
         console.log(blob);
+
+        if(blob) {
+            console.log(blobToDataUrl(blob));
+        }
 
         // TODO: Upload, along with selected text as 'source of truth'.
         // TODO: Implement proper scoring; do this in Vuex mutation.
