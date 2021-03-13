@@ -16,7 +16,7 @@ required_envs = ["AZURE_SPEECH_API_KEY", "AZURE_SPEECH_ENDPOINT", "AZURE_TRANSLA
                  "AZURE_STORAGE_CONNECTION_STRING"]
 
 
-class DockerContainerMixin(object):
+class DockerContainerMixin(object): #todo start
     @classmethod
     def assert_required_env_set(cls):
 
@@ -82,6 +82,19 @@ class TestStuff(TestCase, DockerContainerMixin):
     def test_getvideodata(self):
         resp = requests.get(f'http://127.0.0.1:8080/getvideo/?v={self.address}')
         self.assertEqual(resp.status_code, 200)
+
+    def test_translate(self):
+        resp = requests.post('http://127.0.0.1:8080/translate/',data=dumps(dict(text_to_translate="hello there",
+                                                                                from_language="english",  # Todo: auto detect language, this field can be missing
+                                                                                to_language="german")))
+        self.assertEqual(resp.status_code,200)
+
+    def test_pronounce(self):
+        with open(Path(__file__).parent / "sampletext.txt") as fp:
+            audio = fp.read()
+        resp = requests.post('http://localhost:8080/pronounce/',data=dumps(dict(data=audio,
+                                                                         words="It's bad my dudes")))
+        self.assertEqual(resp.status_code,200)
 
     @classmethod
     def tearDownClass(cls) -> None:
