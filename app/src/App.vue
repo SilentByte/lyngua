@@ -53,6 +53,7 @@
                 <router-view />
             </keep-alive>
 
+            <AppBlockingDialog />
             <VideoSelectionDialog ref="videoSelectionDialog" />
         </v-main>
     </v-app>
@@ -70,9 +71,11 @@ import { getModule } from "vuex-module-decorators";
 import { AppModule } from "@/store/app";
 
 import VideoSelectionDialog from "@/views/dialogs/VideoSelectionDialog.vue";
+import AppBlockingDialog from "@/views/dialogs/AppBlockingDialog.vue";
 
 @Component({
     components: {
+        AppBlockingDialog,
         VideoSelectionDialog,
     },
 })

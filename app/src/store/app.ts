@@ -84,6 +84,8 @@ const FONT_SIZE_MIN = 0.5;
     name: "app",
 })
 export class AppModule extends VuexModule {
+    appBlockingActionCounter = 0;
+
     fontSize = LocalStorage.fontSize || 1.0;
 
     videoId: string | null = null;
@@ -96,12 +98,26 @@ export class AppModule extends VuexModule {
 
     private recorder: microphone.Recorder | null = null;
 
+    get isAppBlocked(): boolean {
+        return this.appBlockingActionCounter > 0;
+    }
+
     get canDecreaseFontSize(): boolean {
         return this.fontSize > FONT_SIZE_MIN;
     }
 
     get canIncreaseFontSize(): boolean {
         return this.fontSize < FONT_SIZE_MAX;
+    }
+
+    @Mutation
+    pushAppBlockingAction(): void {
+        this.appBlockingActionCounter += 1;
+    }
+
+    @Mutation
+    popAppBlockingAction(): void {
+        this.appBlockingActionCounter -= 1;
     }
 
     @Mutation
@@ -143,6 +159,12 @@ export class AppModule extends VuexModule {
     @Mutation
     setRecording(recording: boolean): void {
         this.recording = recording;
+    }
+
+    @Action
+    doQueueAppBlockingAction(payload: { action: Promise<any> }): Promise<any> {
+        this.context.commit("pushAppBlockingAction");
+        return payload.action.finally(() => this.context.commit("popAppBlockingAction"));
     }
 
     @Action
