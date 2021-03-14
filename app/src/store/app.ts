@@ -67,21 +67,25 @@ export function postpone<T>(handler: () => T): void {
     setTimeout(handler, 0);
 }
 
-export function blobToDataUrl(data: Blob): Promise<string> {
+export function extractYouTubeVideoIdFromUrl(url: string): string | null {
+    // See <https://gist.github.com/afeld/1254889>, forcing 10-12 characters.
+    const matches = /(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^?&"'>]{10,12})/.exec(url);
+    return matches === null ? null : matches[5];
+}
+
+function blobToDataUrl(data: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
 
         reader.onload = () => resolve(reader.result as string || "");
         reader.onerror = () => reject();
 
-        reader.readAsArrayBuffer(data);
+        reader.readAsDataURL(data);
     });
 }
 
-export function extractYouTubeVideoIdFromUrl(url: string): string | null {
-    // See <https://gist.github.com/afeld/1254889>, forcing 10-12 characters.
-    const matches = /(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^?&"'>]{10,12})/.exec(url);
-    return matches === null ? null : matches[5];
+async function blobToBase64(data: Blob): Promise<string> {
+    return (await blobToDataUrl(data)).split(",")[1];
 }
 
 VuexModuleDecoratorsConfig.rawError = true;
@@ -162,6 +166,15 @@ export class AppModule extends VuexModule {
     }
 
     @Mutation
+    setWordPronunciationScoreByIndex(payload: { index: number; score: IPronunciationScore }): void {
+        if(!this.transcription) {
+            return;
+        }
+
+        this.transcription.words[payload.index].score = payload.score;
+    }
+
+    @Mutation
     setRecorder(recorder: microphone.Recorder | null): void {
         this.recorder?.removeAllEventListeners();
         this.recorder = recorder;
@@ -233,6 +246,28 @@ export class AppModule extends VuexModule {
                 pos: "noun",
             })),
         };
+    }
+
+    @Action
+    async doScorePronunciation(payload: { words: IWord[]; audio: Blob }): Promise<void> {
+        const response = await axios.post(`${process.env.VUE_APP_API_URL}/pronounce`, {
+            "words": payload.words.map(w => w.display).join(" "),
+            "data": await blobToBase64(payload.audio),
+        });
+
+        const scoredWords = response.data?.NBest[0]?.Words as any[];
+        if(scoredWords) {
+            for(const word of payload.words) {
+                const scoredWord = scoredWords.find(w => w.Word === word.text);
+                this.context.commit("setWordPronunciationScoreByIndex", {
+                    index: word.index,
+                    score: scoredWord ? hint<IPronunciationScore>({
+                        accuracy: scoredWord.AccuracyScore / 100,
+                        error: scoredWord.ErrorType.toLowerCase(),
+                    }) : null,
+                });
+            }
+        }
     }
 
     @Action

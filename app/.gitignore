@@ -4,5 +4,5 @@ node_modules
 .idea
 .vscode
 
-.env.local
+.env.development.local
 .env.*.local

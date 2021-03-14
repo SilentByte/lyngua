@@ -227,7 +227,6 @@ import {
     AppModule,
     IWord,
     ITranslation,
-    blobToDataUrl,
     postpone,
 } from "@/store/app";
 
@@ -457,20 +456,13 @@ export default class HomeView extends Vue {
         this.nativeRecordingTimeout = 0;
 
         const blob = await this.app.doStopRecording();
-        console.log(blob);
-
         if(blob) {
-            console.log(blobToDataUrl(blob));
-        }
-
-        // TODO: Upload, along with selected text as 'source of truth'.
-        // TODO: Implement proper scoring; do this in Vuex mutation.
-        const [start, end] = [this.selectedRange![0].index, this.selectedRange![1].index];
-        for(let i = start; i <= end; i += 1) {
-            this.app.transcription!.words[i].score = {
-                accuracy: Math.random(),
-                error: ["none", "omission", "insertion", "mispronunciation"][(Math.floor(Math.random() * 4))] as any,
-            };
+            await this.app.doQueueAppBlockingAction({
+                action: this.app.doScorePronunciation({
+                    words: this.selectedWords,
+                    audio: blob,
+                }),
+            });
         }
     }
 

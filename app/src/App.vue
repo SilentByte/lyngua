@@ -26,6 +26,7 @@
                       item-text="name"
                       :value="app.language"
                       :items="languages"
+                      :disabled="app.recording"
                       @change="onChangeLanguage">
                 <template v-slot:prepend-inner>
                     <v-icon small
