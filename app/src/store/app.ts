@@ -200,6 +200,11 @@ export class AppModule extends VuexModule {
     }
 
     @Action
+    async doPing(): Promise<void> {
+        await axios.get(`${process.env.VUE_APP_API_URL}/ping`);
+    }
+
+    @Action
     async doFetchVideoInfo(payload: { youTubeVideoId: string }): Promise<IVideoInfo | null> {
         const canonicalUrl = encodeURIComponent(`https://www.youtube.com/watch?v=${payload.youTubeVideoId}`);
         try {

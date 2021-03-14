@@ -120,11 +120,11 @@ export default class App extends Vue {
     }
 
     private onStartNewSession() {
-        // this.videoSelectionDialogRef.show();
-        this.app.doTranscribe({youTubeVideoId: "h4T_LlK1VE4"});
+        this.videoSelectionDialogRef.show();
     }
 
-    async mounted(): Promise<void> {
+    mounted(): void {
+        this.app.doPing();
         this.onStartNewSession();
     }
 }
