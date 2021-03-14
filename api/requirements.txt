@@ -1,0 +1,9 @@
+ffmpeg-python==0.2.0
+python-dotenv==0.15.0
+requests==2.25.1
+youtube-dl==2021.2.22
+azure-functions==1.6.0
+azure-storage-blob==12.8.0
+pydantic
+fastapi==0.63.0
+loguru==0.5.3

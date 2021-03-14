@@ -18,7 +18,7 @@ def required(name: str):
     return os.environ[name]
 
 
-def optional(name: str, default_value: str):
+def optional(name: str, default_value: Union[str, int]):
     return os.getenv(name, default_value)
 
 
@@ -33,3 +33,13 @@ if DEBUG and not DEVELOPMENT:
     raise Exception('DEBUG cannot be ON if DEVELOPMENT is OFF')
 
 AZURE_SPEECH_API_KEY = required('AZURE_SPEECH_API_KEY')
+
+AZURE_STORAGE_CONNECTION_STRING = required('AZURE_STORAGE_CONNECTION_STRING')
+
+AZURE_STORAGE_CONTAINER = optional('AZURE_STORAGE_CONTAINER', 'blobs')
+
+AUDIO_MAX_LENGTH = optional('AUDIO_MAX_LENGTH', 30)
+
+AZURE_SPEECH_ENDPOINT = required('AZURE_SPEECH_ENDPOINT')
+
+AZURE_TRANSLATE_KEY = required('AZURE_TRANSLATE_KEY')

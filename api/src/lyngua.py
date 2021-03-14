@@ -2,18 +2,16 @@
     LYNGUA LANGUAGE LEARNING EXPERIENCE
     Copyright (c) 2021 by SilentByte <https://silentbyte.com/>
 """
-
+ # Deprecated and planning to delete
 import json
 import base64
 import logging
 import requests
-import youtube_dl
-import ffmpeg
 
 from typing import List
 from dataclasses import dataclass
 
-from lyngua import settings
+from lyngua_api import settings
 
 log = logging.getLogger(__name__)
 
@@ -38,32 +36,6 @@ def _request_speech_token() -> str:
 
     response.raise_for_status()
     return response.content.decode('utf-8')
-
-
-def _fetch_youtube_audio(video_id: str) -> bytes:
-    video_url = f'https://www.youtube.com/watch?v={video_id}'
-    options = {
-        'format': 'worstaudio/worst',
-        'simulate': True,
-        'logger': log,
-    }
-
-    with youtube_dl.YoutubeDL(options) as ydl:
-        video_info = ydl.extract_info(video_url, download=False)
-
-    stream = (
-        ffmpeg
-            .input(video_info['url'])
-            .audio
-            .output('pipe:', format='wav',
-                    ar=16_000, ac=1,
-                    ss=0, to=AUDIO_MAX_LENGTH)
-    )
-
-    log.info(f'Running {ffmpeg.compile(stream)}')
-    wav_data, _ = ffmpeg.run(stream, capture_stdout=True)
-
-    return wav_data
 
 
 @dataclass
