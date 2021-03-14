@@ -38,9 +38,26 @@
                     </v-col>
                     <v-col cols="12">
                         <v-card outlined
+                                class="slim-scrollbar overflow-y-auto"
                                 :height="infoHeight">
-                            CONTROLS / DICTIONARY?
-                            {{ selectedRange }}
+
+                            <v-card-text v-if="translation">
+                                <v-row dense>
+                                    <v-col cols="12">
+                                        <strong>Translation:</strong>
+                                        {{ translation.text }}
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <div v-for="(w, i) in translation.words" :key="i"
+                                             class="mb-2">
+                                            {{ w.source }} {{ w.pos }} {{ w.target }} - example?
+                                        </div>
+                                    </v-col>
+                                </v-row>
+                            </v-card-text>
+                            <v-card-text v-else>
+                                Select text to translate.
+                            </v-card-text>
 
                             <v-overlay absolute
                                        opacity="0.8"
@@ -209,6 +226,7 @@ import { getModule } from "vuex-module-decorators";
 import {
     AppModule,
     IWord,
+    ITranslation,
     blobToDataUrl,
     postpone,
 } from "@/store/app";
@@ -244,8 +262,18 @@ export default class HomeView extends Vue {
     private recordingStartTimestamp = 0;
     private recordingDuration = 0;
 
+    private translation: ITranslation | null = null;
+
     private get recordingDurationPercentage() {
         return this.recordingDuration / (MAX_RECORDING_TIMEOUT_MS / 1000) * 100;
+    }
+
+    private get selectedWords(): IWord[] {
+        if(!this.selectedRange) {
+            return [];
+        }
+
+        return this.app.transcription!.words.slice(this.selectedRange[0].index, this.selectedRange[1].index + 1);
     }
 
     private player(): Record<string, any> | null {
@@ -344,7 +372,16 @@ export default class HomeView extends Vue {
         const savedRange = this.selectedRange;
         rangy.getNativeSelection().removeAllRanges();
 
-        postpone(() => this.selectedRange = savedRange);
+        postpone(async () => {
+            this.selectedRange = savedRange;
+
+            // TODO: Debounce.
+            this.translation = null;
+            this.translation = await this.app.doTranslate({
+                words: this.selectedWords.map(w => w.display),
+                targetLanguage: "de-CH",
+            });
+        });
     }
 
     private onPlayerReady() {

@@ -46,6 +46,17 @@ export interface IVideoInfo {
     author: string;
 }
 
+export interface IDictionaryEntry {
+    source: string;
+    target: string;
+    pos: "noun" | "verb" | "adjective";
+}
+
+export interface ITranslation {
+    text: string;
+    words: IDictionaryEntry[];
+}
+
 export function hint<T>(value: T): T {
     return value;
 }
@@ -201,6 +212,19 @@ export class AppModule extends VuexModule {
                 score: null,
             })),
         }));
+    }
+
+    @Action
+    async doTranslate(payload: { words: string[]; targetLanguage: string }): Promise<ITranslation> {
+        // TODO: IMPLEMENT.
+        return {
+            text: payload.words.join(" ").toUpperCase(),
+            words: payload.words.map(w => ({
+                source: w,
+                target: w.toUpperCase(),
+                pos: "noun",
+            })),
+        };
     }
 
     @Action
