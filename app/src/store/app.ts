@@ -19,6 +19,8 @@ import * as microphone from "@/microphone";
 
 export type PronunciationError = "none" | "omission" | "insertion" | "mispronunciation";
 
+export type SupportedLanguage = "en" | "de" | "fr" | "it" | "pt";
+
 export interface IPronunciationScore {
     accuracy: number;
     error: PronunciationError;
@@ -97,6 +99,7 @@ const FONT_SIZE_MIN = 0.5;
 export class AppModule extends VuexModule {
     appBlockingActionCounter = 0;
 
+    language: SupportedLanguage = "en";
     fontSize = LocalStorage.fontSize || 1.0;
 
     videoId: string | null = null;
@@ -129,6 +132,11 @@ export class AppModule extends VuexModule {
     @Mutation
     popAppBlockingAction(): void {
         this.appBlockingActionCounter -= 1;
+    }
+
+    @Mutation
+    setLanguage(code: SupportedLanguage): void {
+        this.language = code;
     }
 
     @Mutation

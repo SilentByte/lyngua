@@ -19,6 +19,14 @@
 
             <v-spacer />
 
+            <v-select dense outlined hide-details
+                      style="max-width: 200px"
+                      item-value="code"
+                      item-text="name"
+                      :value="app.language"
+                      :items="languages"
+                      @change="onChangeLanguage" />
+
             <v-toolbar-items>
                 <v-btn text
                        :disabled="app.recording"
@@ -59,6 +67,7 @@
     </v-app>
 </template>
 
+<!--suppress JSMethodCanBeStatic -->
 <script lang="ts">
 
 import {
@@ -68,7 +77,10 @@ import {
 } from "vue-property-decorator";
 
 import { getModule } from "vuex-module-decorators";
-import { AppModule } from "@/store/app";
+import {
+    AppModule,
+    SupportedLanguage,
+} from "@/store/app";
 
 import VideoSelectionDialog from "@/views/dialogs/VideoSelectionDialog.vue";
 import AppBlockingDialog from "@/views/dialogs/AppBlockingDialog.vue";
@@ -82,7 +94,21 @@ import AppBlockingDialog from "@/views/dialogs/AppBlockingDialog.vue";
 export default class App extends Vue {
     private readonly app = getModule(AppModule);
 
+    private get languages(): Array<{ code: SupportedLanguage; name: string }> {
+        return [
+            {code: "en", name: "English"},
+            {code: "de", name: "German"},
+            {code: "fr", name: "French"},
+            {code: "it", name: "Italian"},
+            {code: "pt", name: "Portuguese"},
+        ];
+    }
+
     @Ref("videoSelectionDialog") private readonly videoSelectionDialogRef!: VideoSelectionDialog;
+
+    private onChangeLanguage(code: SupportedLanguage) {
+        this.app.setLanguage(code);
+    }
 
     private onStartNewSession() {
         // this.videoSelectionDialogRef.show();
