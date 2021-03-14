@@ -20,12 +20,20 @@
             <v-spacer />
 
             <v-select dense outlined hide-details
+                      class="text-uppercase"
                       style="max-width: 200px"
                       item-value="code"
                       item-text="name"
                       :value="app.language"
                       :items="languages"
-                      @change="onChangeLanguage" />
+                      @change="onChangeLanguage">
+                <template v-slot:prepend-inner>
+                    <v-icon small
+                            class="mt-1 me-1">
+                        mdi-translate
+                    </v-icon>
+                </template>
+            </v-select>
 
             <v-toolbar-items>
                 <v-btn text
