@@ -244,7 +244,7 @@ export default class VideoSelectionDialog extends Vue {
             return;
         }
 
-        this.customVideoInfo = await this.app.doFetchVideoInfo({youTubeVideoId: videoId});
+        this.customVideoInfo = await this.app.doFetchVideoInfo({videoId});
         if(this.customVideoInfo !== null) {
             this.selectedVideoIndex = 0;
         }
@@ -259,8 +259,8 @@ export default class VideoSelectionDialog extends Vue {
             ? this.featuredVideos[this.selectedVideoIndex]
             : [this.customVideoInfo, ...this.featuredVideos][this.selectedVideoIndex];
 
-        this.app.doTranscribe({
-            youTubeVideoId: video.videoId,
+        this.app.doQueueAppBlockingAction({
+            action: this.app.doTranscribe({videoId: video.videoId}),
         });
 
         this.visible = false;
