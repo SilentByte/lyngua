@@ -3,17 +3,28 @@ from typing import List, Optional
 from lyngua_api import settings
 import base64
 from json import dumps
-from lyngua_api.models.cognitive_models import TranslationResponse, LanguageDiscoverResponse, PronounceResponse, SpeechToTextResponse
+from lyngua_api.models.cognitive_models import TranslationResponse, LanguageDiscoverResponse, PronounceResponse, \
+    SpeechToTextResponse
+from typing_extensions import TypedDict
+from itertools import islice
+
+azure_languages = dict(
+    en="english",
+    de="german",
+    fr="french",
+    it="italian",
+    pt="portuguese"
+)
+
+
+class TranslateDict(TypedDict):
+    Text: str
+    Translation: str
+
 
 # We're only supporting languages that are supported by Immersive reader
 # language codes https://docs.microsoft.com/en-us/azure/cognitive-services/translator/reference/v3-0-languages
 # Todo figure this out dynamically with https://api.cognitive.microsofttranslator.com/languages?api-version=3.0&scope=translation
-azure_languages = dict(
-    japanese="ja",
-    chinese="zh",
-    english="en",
-    german="de"
-)
 
 
 def _dict_to_base64_json(data: dict) -> str:
@@ -83,7 +94,7 @@ class TranslatorAPI():
         response.raise_for_status()
         return [LanguageDiscoverResponse(**x) for x in response.json()]
 
-    def translate_string(self, text_to_translate: str, from_language: Optional[str], to_language: str) -> List[
+    def translate_string(self, text_to_translate: List[str], from_language: str, to_language: str) -> List[
         TranslationResponse]:
         header = self.headers.copy()
         header['charset'] = 'UTF-8'
@@ -91,8 +102,58 @@ class TranslatorAPI():
             if language.lower() not in azure_languages.keys():
                 raise KeyError(f"Language {language} not supported")
         response = requests.post(
-            url=f"{self.translate_endpoint}/translate?api-version=3.0&from={azure_languages[from_language]}&to={azure_languages[to_language]}",
-            data=dumps([dict(Text=text_to_translate)]),
+            url=f"{self.translate_endpoint}/translate?api-version=3.0&from={from_language}&to={to_language}",
+            data=dumps([dict(Text=word) for word in text_to_translate]),
             headers=header)
         response.raise_for_status()
         return [TranslationResponse(**x) for x in response.json()]
+
+    def dictionary_lookup(self, words: List[TranslateDict], from_language: str, to_language: str):
+        # Wrapper for the private method to ensure that I only send 10 (limit of API) words at a time
+        responses = []
+
+        def split_seq(iterable, size):
+            it = iter(iterable)
+            item = list(islice(it, size))
+            while item:
+                yield item
+                item = list(islice(it, size))
+
+        for myslice in split_seq(words, 10):
+            responses += self._dictionary_lookup(myslice, from_language, to_language)
+
+        return_vals = []
+        for resp in responses:
+            if len(resp['translations']) == 0:
+                return_vals.append(dict(
+                    source_word=resp['displaySource'],
+                    translated_word=None,
+                    word_type=None,
+                    confidence=None,
+                    backTranslations=None))
+            else:
+                back_translations = [a['displayText'] for a in resp['translations'][0]['backTranslations']]
+
+
+                return_vals.append(dict(source_word=resp['displaySource'],
+                                        translated_word=resp['translations'][0]['displayTarget'],
+                                        word_type=resp['translations'][0]['posTag'],
+                                        confidence=resp['translations'][0]['confidence'],
+                                        backTranslations=back_translations
+                                        ))
+
+
+        return return_vals
+
+
+    def _dictionary_lookup(self, words: List[TranslateDict], from_language: str, to_language: str):
+        for language in [from_language, to_language]:
+            if language.lower() not in azure_languages.keys():
+                raise KeyError(f"Language {language} not supported")
+        response = requests.post(
+            url=f"{self.translate_endpoint}/dictionary/lookup?api-version=3.0&from={from_language}&to={to_language}",
+            headers=self.headers,
+            data=dumps(words[0:9])
+        )
+        response.raise_for_status()
+        return response.json()
