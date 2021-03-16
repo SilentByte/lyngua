@@ -378,7 +378,7 @@ export default class HomeView extends Vue {
             this.translation = null;
             this.translation = await this.app.doTranslate({
                 words: this.selectedWords.map(w => w.display),
-                targetLanguage: "de-CH",
+                targetLanguage: this.app.language,
             });
         });
     }

@@ -225,7 +225,7 @@ export class AppModule extends VuexModule {
     async doTranscribe(payload: { videoId: string }): Promise<void> {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/getvideo`, {
             params: {
-                "v": `https://www.youtube.com/watch?v=${payload.videoId}`,
+                v: payload.videoId,
             },
         });
 
@@ -244,8 +244,16 @@ export class AppModule extends VuexModule {
     }
 
     @Action
-    async doTranslate(payload: { words: string[]; targetLanguage: string }): Promise<ITranslation> {
-        // TODO: IMPLEMENT.
+    async doTranslate(payload: { words: string[]; targetLanguage: SupportedLanguage }): Promise<ITranslation> {
+        const response = await axios.post(`${process.env.VUE_APP_API_URL}/translatev2`, {
+            text_to_translate: payload.words,
+            from_language: "en", // TODO: Pass language from video.
+            to_language: payload.targetLanguage,
+        });
+
+        // TODO: IMPLEMENT; PARSE.
+        console.log(response.data);
+
         return {
             text: payload.words.join(" ").toUpperCase(),
             words: payload.words.map(w => ({
@@ -259,8 +267,8 @@ export class AppModule extends VuexModule {
     @Action
     async doScorePronunciation(payload: { words: IWord[]; audio: Blob }): Promise<void> {
         const response = await axios.post(`${process.env.VUE_APP_API_URL}/pronounce`, {
-            "words": payload.words.map(w => w.display).join(" "),
-            "data": await blobToBase64(payload.audio),
+            words: payload.words.map(w => w.display).join(" "),
+            data: await blobToBase64(payload.audio),
         });
 
         const scoredWords = response.data?.NBest[0]?.Words as any[];
