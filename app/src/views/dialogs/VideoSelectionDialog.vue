@@ -24,17 +24,22 @@
                     <v-row>
                         <v-col cols="12">
                             <div class="text-body-1">
-                                Copy &amp; paste a link to a YouTube video into the text field below&hellip;
+                                Copy &amp; paste a link to a YouTube video into the text field below.
                             </div>
                         </v-col>
-                        <v-col cols="12" class="pb-0">
-                            <v-text-field dense outlined clearable
+                        <v-col cols="12">
+                            <v-text-field dense outlined clearable hide-details
                                           placeholder="https://www.youtube.com/watch?v=…"
                                           :rules="youTubeVideoIdRules"
                                           @input="onVideoUrlChanged" />
                         </v-col>
+                        <v-col cols="12" class="pt-1 text-caption">
+                            <v-icon small color="info">mdi-information-outline</v-icon>
+                            For this demo, only the first 90 seconds will be processed and the video must
+                            contain speech within the first five seconds. Processing may take a while.
+                        </v-col>
 
-                        <v-col cols="12" class="pt-0">
+                        <v-col cols="12">
                             <v-list two-line rounded
                                     max-height="400"
                                     class="pt-0 overflow-y-auto slim-scrollbar">
@@ -73,7 +78,7 @@
                                             'text--secondary',
                                             customVideoInfo ? 'py-6' : 'pb-6',
                                         ]">
-                                        &hellip;or select one of these suggestions:
+                                        &hellip;alternatively, select one of our suggestions:
                                     </div>
 
                                     <v-list-item v-for="v in featuredVideos" :key="v.videoId"
@@ -193,13 +198,6 @@ export default class VideoSelectionDialog extends Vue {
             title: "Why Are 96,000,000 Black Balls on This Reservoir?",
             author: "Veritasium",
         },
-        {
-            videoId: "Vxlci1d2rOg",
-            canonicalUrl: "https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DVxlci1d2rOg",
-            thumbnailUrl: "https://i.ytimg.com/vi/Vxlci1d2rOg/hqdefault.jpg",
-            title: "How They Did It - Pet Dogs in Ancient Rome",
-            author: "Invicta",
-        },
     ];
 
     private get fullscreen() {
@@ -217,7 +215,7 @@ export default class VideoSelectionDialog extends Vue {
             case "xs":
                 return "100%";
             default:
-                return "800px";
+                return "780px";
         }
     }
 
