@@ -50,7 +50,13 @@
                                     <v-col cols="12">
                                         <div v-for="(w, i) in translation.words" :key="i"
                                              class="mb-2">
-                                            {{ w.source }} {{ w.pos }} {{ w.target }} - example?
+                                            {{ i + 1 }}.
+                                            "<strong>{{ w.source }}</strong>",
+                                            {{ w.target }}
+                                            <span class="text-caption"
+                                                  :title="formatPartOfSpeech(w).long">
+                                                ({{ formatPartOfSpeech(w).short }})
+                                            </span>
                                         </div>
                                     </v-col>
                                 </v-row>
@@ -227,7 +233,7 @@ import {
     AppModule,
     IWord,
     ITranslation,
-    postpone,
+    postpone, IDictionaryEntry,
 } from "@/store/app";
 
 const PLAYER_TICK_INTERVAL_MS = 100;
@@ -273,6 +279,21 @@ export default class HomeView extends Vue {
         }
 
         return this.app.transcription!.words.slice(this.selectedRange[0].index, this.selectedRange[1].index + 1);
+    }
+
+    private formatPartOfSpeech(w: IDictionaryEntry) {
+        return {
+            ADJ: {long: "adjective", short: "adj."},
+            ADV: {long: "adverb", short: "adv."},
+            CONJ: {long: "conjunction", short: "conj."},
+            DET: {long: "determiner", short: "det."},
+            MODAL: {long: "verb", short: "verb"},
+            NOUN: {long: "noun", short: "noun"},
+            PREP: {long: "preposition", short: "prep."},
+            PRON: {long: "pronoun", short: "pro."},
+            VERB: {long: "verb", short: "verb"},
+            OTHER: {long: "other", short: "other"},
+        }[w.pos];
     }
 
     private player(): Record<string, any> | null {

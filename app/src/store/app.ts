@@ -51,7 +51,7 @@ export interface IVideoInfo {
 export interface IDictionaryEntry {
     source: string;
     target: string;
-    pos: "noun" | "verb" | "adjective";
+    pos: "ADJ" | "ADV" | "CONJ" | "DET" | "MODAL" | "NOUN" | "PREP" | "PRON" | "VERB" | "OTHER";
 }
 
 export interface ITranslation {
@@ -246,20 +246,17 @@ export class AppModule extends VuexModule {
     @Action
     async doTranslate(payload: { words: string[]; targetLanguage: SupportedLanguage }): Promise<ITranslation> {
         const response = await axios.post(`${process.env.VUE_APP_API_URL}/translatev2`, {
-            text_to_translate: payload.words,
+            text_to_translate: payload.words.slice(0, 10),
             from_language: "en", // TODO: Pass language from video.
             to_language: payload.targetLanguage,
         });
 
-        // TODO: IMPLEMENT; PARSE.
-        console.log(response.data);
-
         return {
-            text: payload.words.join(" ").toUpperCase(),
-            words: payload.words.map(w => ({
-                source: w,
-                target: w.toUpperCase(),
-                pos: "noun",
+            text: "TODO TODO TODO TODO TODO TODO TODO TODO",
+            words: response.data.map((w: any) => ({
+                source: w.source_word,
+                target: w.translated_word,
+                pos: w.word_type,
             })),
         };
     }
