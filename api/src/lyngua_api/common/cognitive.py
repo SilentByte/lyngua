@@ -123,10 +123,10 @@ class TranslatorAPI():
             responses += self._dictionary_lookup(myslice, from_language, to_language)
 
         return_vals = []
-        for resp in responses:
+        for resp, wordthing in zip(responses,words):
             if len(resp['translations']) == 0:
                 return_vals.append(dict(
-                    source_word=resp['displaySource'],
+                    source_word=wordthing['Text'],
                     translated_word=None,
                     word_type=None,
                     confidence=None,
@@ -135,7 +135,7 @@ class TranslatorAPI():
                 back_translations = [a['displayText'] for a in resp['translations'][0]['backTranslations']]
 
 
-                return_vals.append(dict(source_word=resp['displaySource'],
+                return_vals.append(dict(source_word=wordthing['Text'],
                                         translated_word=resp['translations'][0]['displayTarget'],
                                         word_type=resp['translations'][0]['posTag'],
                                         confidence=resp['translations'][0]['confidence'],

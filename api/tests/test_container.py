@@ -79,21 +79,27 @@ class TestStuff(TestCase, DockerContainerMixin):
     @classmethod
     def setUpClass(cls) -> None:
         cls.setup_container()
-
+    def setUp(self) -> None:
+        # I keep getting 429'd because my tests run too fast
+        sleep(5)
     def test_getvideodata(self):
         resp = requests.get(f'http://127.0.0.1:8080/getvideo/?v={self.address}')
         self.assertEqual(resp.status_code, 200)
 
     def test_translate(self):
-        text = "I literally just need 10 words for this to test properly"
-        resp = requests.post('http://127.0.0.1:8080/translate/', data=dumps(dict(text_to_translate=text.split(" "),
-                                                                                 from_language="english",
-                                                                                 to_language="german")))
+        text = "Rico I am 100% sure that the translate API supports more than 10 words at a time."
+        resp = requests.post('http://127.0.0.1:8080/translatev2/', data=dumps(dict(text_to_translate=text.split(" "),
+                                                                                 from_language="en",
+                                                                                 to_language="de")))
         self.assertEqual(resp.status_code, 200)
+        print(resp)
 
-        resp = requests.post('http://127.0.0.1:8080/translate/', data=dumps(dict(text_to_translate=text.split(" "),
-                                                                                 to_language="german")))
+        resp = requests.post('http://127.0.0.1:8080/translatev2/', data=dumps(dict(text_to_translate=text.split(" "),
+                                                                                 to_language="de")))
         self.assertEqual(resp.status_code, 200)
+        print(resp)
+        text = "this guy stole my package".split(" ")
+
 
     def test_pronounce(self):
         with open(Path(__file__).parent / "sampletext.txt") as fp:

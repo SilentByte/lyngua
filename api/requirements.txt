@@ -7,3 +7,4 @@ azure-storage-blob==12.8.0
 pydantic
 fastapi==0.63.0
 loguru==0.5.3
+typing_extensions

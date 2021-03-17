@@ -31,7 +31,7 @@ def strip_video(video_url: str) -> str:
 
 def fix_data(data: dict) -> List[dict]:
     words = data['NBest'][0]['Words']  # only ever have one item in the list
-    return [dict(Word=x['Word'], Offset=x['Offset'] / 1000, Duration=x['Duration'] / 1000) for x in words]
+    return [dict(Word=x['Word'], Offset=x['Offset'], Duration=x['Duration']) for x in words]
 
 
 @get_video_router.get("/getvideo/")
@@ -40,7 +40,8 @@ def getvideo(v: str):
     video = v
     logging.info(f'Python HTTP trigger function processed a request. video {video}')
     # Lots of possible video formats
-    video_code = strip_video(video)
+    #video_code = strip_video(video)
+    video_code = v
     logging.info(f'Video code {video_code}')
     data = blob.get_blob(video_code)
     if data is None:

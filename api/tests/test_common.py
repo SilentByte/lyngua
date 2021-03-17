@@ -16,7 +16,7 @@ class TestSpeechFunctions(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.api = SpeechAPI()
-        cls.video = fetch_youtube_audio(video_id='U8wLBOlCKPU')
+        cls.video = fetch_youtube_audio(video_id='Vxlci1d2rOg')
         cls.video_text = "It's over Anakin I have the high ground. You underestimate my power. Don't try it"
 
     def test_sst(self):
@@ -54,6 +54,19 @@ class TestFunction(TestCase):
         input = TranslateFormat(
             **dict(text_to_translate="A set of words that are more than 10 but still reasonable".split(" "),
                    from_language="en",
+                   to_language="de"
+                   ))
+        translatev2(input)
+
+    def test_translate_v2_guess(self):
+        input = TranslateFormat(
+            **dict(text_to_translate="I literally just need 10 words for this to test properly".split(" "),
+                   to_language="de"
+                   ))
+        translatev2(input)
+    def test_translate_v2_guess_short(self):
+        input = TranslateFormat(
+            **dict(text_to_translate="I literally just".split(" "),
                    to_language="de"
                    ))
         translatev2(input)
