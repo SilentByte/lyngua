@@ -3,9 +3,19 @@
  * Copyright (c) 2021 by SilentByte <https://silentbyte.com/>
  */
 
+import { SupportedLanguage } from "@/store/app";
+
 export default class LocalStorage {
     private constructor() {
         //
+    }
+
+    static get language(): SupportedLanguage {
+        return localStorage.getItem("app.language") as SupportedLanguage || "en";
+    }
+
+    static set language(code: SupportedLanguage) {
+        localStorage.setItem("app.language", code);
     }
 
     static get fontSize(): number {

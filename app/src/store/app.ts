@@ -103,7 +103,7 @@ const FONT_SIZE_MIN = 0.5;
 export class AppModule extends VuexModule {
     appBlockingActionCounter = 0;
 
-    language: SupportedLanguage = "en";
+    language: SupportedLanguage = LocalStorage.language;
     fontSize = LocalStorage.fontSize || 1.0;
 
     videoId: string | null = null;
@@ -141,6 +141,7 @@ export class AppModule extends VuexModule {
     @Mutation
     setLanguage(code: SupportedLanguage): void {
         this.language = code;
+        LocalStorage.language = code;
     }
 
     @Mutation
