@@ -7,6 +7,7 @@ from lyngua_api.models.cognitive_models import TranslationResponse, LanguageDisc
     SpeechToTextResponse
 from typing_extensions import TypedDict
 from itertools import islice
+from pydantic import ValidationError
 
 azure_languages = dict(
     en="english",
@@ -54,11 +55,11 @@ class SpeechAPI():  # Basics, transforming should be done in the azure function 
             'Ocp-Apim-Subscription-Key': settings.AZURE_SPEECH_API_KEY
         }
 
-    def speech_to_text(self, wav_data: bytes) -> SpeechToTextResponse:
+    def speech_to_text(self, wav_data: bytes, language='en-US') -> SpeechToTextResponse:
         header = self.base_header.copy()
         header['Content-Type'] = 'audio/wav'
         response = requests.post(
-            url=f"{self.endpoint}/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed&wordLevelTimestamps=true&profanity=raw",
+            url=f"{self.endpoint}/speech/recognition/conversation/cognitiveservices/v1?language={language}&format=detailed&wordLevelTimestamps=true&profanity=raw",
             data=wav_data, headers=header)
         response.raise_for_status()
         return SpeechToTextResponse(**response.json())
@@ -123,7 +124,7 @@ class TranslatorAPI():
             responses += self._dictionary_lookup(myslice, from_language, to_language)
 
         return_vals = []
-        for resp, wordthing in zip(responses,words):
+        for resp, wordthing in zip(responses, words):
             if len(resp['translations']) == 0:
                 return_vals.append(dict(
                     source_word=wordthing['Text'],
@@ -134,7 +135,6 @@ class TranslatorAPI():
             else:
                 back_translations = [a['displayText'] for a in resp['translations'][0]['backTranslations']]
 
-
                 return_vals.append(dict(source_word=wordthing['Text'],
                                         translated_word=resp['translations'][0]['displayTarget'],
                                         word_type=resp['translations'][0]['posTag'],
@@ -142,9 +142,7 @@ class TranslatorAPI():
                                         backTranslations=back_translations
                                         ))
 
-
         return return_vals
-
 
     def _dictionary_lookup(self, words: List[TranslateDict], from_language: str, to_language: str):
         for language in [from_language, to_language]:

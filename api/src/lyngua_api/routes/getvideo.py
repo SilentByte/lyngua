@@ -4,7 +4,8 @@ import re
 from lyngua_api.common import blob, audio
 from lyngua_api.common.cognitive import SpeechAPI
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
+from pydantic import ValidationError
 get_video_router = APIRouter()
 cognitive_api = SpeechAPI()
 
@@ -35,17 +36,26 @@ def fix_data(data: dict) -> List[dict]:
 
 
 @get_video_router.get("/getvideo/")
-def getvideo(v: str):
+def getvideo(v: str, l: Optional[str]):
     data = None
     video = v
+    if l is None:
+        language='en-US'
+    else:
+        language= l
     logging.info(f'Python HTTP trigger function processed a request. video {video}')
     # Lots of possible video formats
-    #video_code = strip_video(video)
+    # video_code = strip_video(video)
     video_code = v
     logging.info(f'Video code {video_code}')
     data = blob.get_blob(video_code)
     if data is None:
         vid = audio.fetch_youtube_audio(video_code)
-        data = cognitive_api.speech_to_text(vid).dict()
+        try:
+            data = cognitive_api.speech_to_text(vid,language=language).dict()
+        except ValidationError:
+            # Normal errors will 500 out
+            data = []
+
         blob.insert_blob(blobname=video_code, data=data)
     return fix_data(data)
