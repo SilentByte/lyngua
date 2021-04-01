@@ -81,9 +81,12 @@
                                 </v-row>
                             </v-card-text>
                             <v-card-text v-else>
-                                <v-alert type="info">
+                                <v-alert outlined
+                                         :type="app.sourceLanguage === app.targetLanguage ? 'error' : 'info'">
                                     <div>Highlight text on the right to translate.</div>
-                                    <small>Please note that the source and target languages must be different.</small>
+                                    <small v-if="app.sourceLanguage === app.targetLanguage">
+                                        Please note that the source and target languages must be different.
+                                    </small>
                                 </v-alert>
                             </v-card-text>
 
