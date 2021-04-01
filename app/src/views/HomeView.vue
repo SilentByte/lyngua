@@ -417,7 +417,7 @@ export default class HomeView extends Vue {
         postpone(async () => {
             this.selectedRange = savedRange;
 
-            if(this.app.sourceLanguage !== this.app.targetLanguage) {
+            if(this.selectedRange !== null && this.app.sourceLanguage !== this.app.targetLanguage) {
                 this.translation = null;
                 this.translationPending = true;
                 try {

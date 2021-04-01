@@ -262,14 +262,14 @@ export class AppModule extends VuexModule {
         targetLanguage: SupportedLanguage;
     }): Promise<ITranslation> {
         const response = await axios.post(`${process.env.VUE_APP_API_URL}/translatev2`, {
-            text_to_translate: payload.words.slice(0, 10),
+            text_to_translate: payload.words,
             from_language: payload.sourceLanguage,
             to_language: payload.targetLanguage,
         });
 
         return {
-            text: "TODO TODO TODO TODO TODO TODO TODO TODO",
-            words: response.data.map((w: any) => ({
+            text: response.data.text,
+            words: response.data.words.map((w: any) => ({
                 source: w.source_word,
                 target: w.translated_word,
                 pos: w.word_type,
