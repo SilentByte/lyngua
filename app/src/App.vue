@@ -20,14 +20,33 @@
             <v-spacer />
 
             <v-select dense outlined hide-details
-                      class="text-uppercase"
-                      style="max-width: 200px"
+                      class="me-2"
+                      style="max-width: 220px"
+                      prefix="From:"
                       item-value="code"
                       item-text="name"
-                      :value="app.language"
+                      :value="app.sourceLanguage"
                       :items="languages"
                       :disabled="app.recording"
-                      @change="onChangeLanguage">
+                      @change="onChangeSourceLanguage">
+                <template v-slot:prepend-inner>
+                    <v-icon small
+                            class="mt-1 me-1">
+                        mdi-translate
+                    </v-icon>
+                </template>
+            </v-select>
+
+            <v-select dense outlined hide-details
+                      class="me-2"
+                      style="max-width: 220px"
+                      prefix="From:"
+                      item-value="code"
+                      item-text="name"
+                      :value="app.targetLanguage"
+                      :items="languages"
+                      :disabled="app.recording"
+                      @change="onChangeTargetLanguage">
                 <template v-slot:prepend-inner>
                     <v-icon small
                             class="mt-1 me-1">
@@ -115,8 +134,12 @@ export default class App extends Vue {
 
     @Ref("videoSelectionDialog") private readonly videoSelectionDialogRef!: VideoSelectionDialog;
 
-    private onChangeLanguage(code: SupportedLanguage) {
-        this.app.setLanguage(code);
+    private onChangeSourceLanguage(code: SupportedLanguage) {
+        this.app.setSourceLanguage(code);
+    }
+
+    private onChangeTargetLanguage(code: SupportedLanguage) {
+        this.app.setTargetLanguage(code);
     }
 
     private onStartNewSession() {

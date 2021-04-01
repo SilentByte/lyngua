@@ -52,6 +52,7 @@ export interface IDictionaryEntry {
     source: string;
     target: string;
     pos: "ADJ" | "ADV" | "CONJ" | "DET" | "MODAL" | "NOUN" | "PREP" | "PRON" | "VERB" | "OTHER";
+    alternatives: string[];
 }
 
 export interface ITranslation {
@@ -103,7 +104,8 @@ const FONT_SIZE_MIN = 0.5;
 export class AppModule extends VuexModule {
     appBlockingActionCounter = 0;
 
-    language: SupportedLanguage = LocalStorage.language;
+    sourceLanguage: SupportedLanguage = LocalStorage.sourceLanguage;
+    targetLanguage: SupportedLanguage = LocalStorage.targetLanguage;
     fontSize = LocalStorage.fontSize || 1.0;
 
     videoId: string | null = null;
@@ -139,9 +141,15 @@ export class AppModule extends VuexModule {
     }
 
     @Mutation
-    setLanguage(code: SupportedLanguage): void {
-        this.language = code;
-        LocalStorage.language = code;
+    setSourceLanguage(code: SupportedLanguage): void {
+        this.sourceLanguage = code;
+        LocalStorage.sourceLanguage = code;
+    }
+
+    @Mutation
+    setTargetLanguage(code: SupportedLanguage): void {
+        this.targetLanguage = code;
+        LocalStorage.targetLanguage = code;
     }
 
     @Mutation
@@ -223,12 +231,15 @@ export class AppModule extends VuexModule {
     }
 
     @Action
-    async doTranscribe(payload: { videoId: string }): Promise<void> {
+    async doTranscribe(payload: { videoId: string; sourceLanguage: SupportedLanguage }): Promise<void> {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/getvideo`, {
             params: {
                 v: payload.videoId,
+                l: payload.sourceLanguage,
             },
         });
+
+        console.log(response);
 
         this.context.commit("setVideoId", payload.videoId);
         this.context.commit("setTranscription", hint<ITranscription>({
@@ -245,10 +256,14 @@ export class AppModule extends VuexModule {
     }
 
     @Action
-    async doTranslate(payload: { words: string[]; targetLanguage: SupportedLanguage }): Promise<ITranslation> {
+    async doTranslate(payload: {
+        words: string[];
+        sourceLanguage: SupportedLanguage;
+        targetLanguage: SupportedLanguage;
+    }): Promise<ITranslation> {
         const response = await axios.post(`${process.env.VUE_APP_API_URL}/translatev2`, {
             text_to_translate: payload.words.slice(0, 10),
-            from_language: "en", // TODO: Pass language from video.
+            from_language: payload.sourceLanguage,
             to_language: payload.targetLanguage,
         });
 
@@ -258,6 +273,7 @@ export class AppModule extends VuexModule {
                 source: w.source_word,
                 target: w.translated_word,
                 pos: w.word_type,
+                alternatives: w.backTranslations.filter((bt: string) => bt !== w.source_word),
             })),
         };
     }

@@ -10,12 +10,20 @@ export default class LocalStorage {
         //
     }
 
-    static get language(): SupportedLanguage {
-        return localStorage.getItem("app.language") as SupportedLanguage || "en";
+    static get sourceLanguage(): SupportedLanguage {
+        return localStorage.getItem("app.source-language") as SupportedLanguage || "en";
     }
 
-    static set language(code: SupportedLanguage) {
-        localStorage.setItem("app.language", code);
+    static set sourceLanguage(code: SupportedLanguage) {
+        localStorage.setItem("app.source-language", code);
+    }
+
+    static get targetLanguage(): SupportedLanguage {
+        return localStorage.getItem("app.target-language") as SupportedLanguage || "de";
+    }
+
+    static set targetLanguage(code: SupportedLanguage) {
+        localStorage.setItem("app.target-language", code);
     }
 
     static get fontSize(): number {

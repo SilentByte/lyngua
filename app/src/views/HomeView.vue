@@ -41,28 +41,50 @@
                                 class="slim-scrollbar overflow-y-auto"
                                 :height="infoHeight">
 
-                            <v-card-text v-if="translation">
+                            <v-card-text v-if="translationPending"
+                                         class="mt-8 text-center">
+                                <v-progress-circular indeterminate color="primary" />
+                            </v-card-text>
+                            <v-card-text v-else-if="translation">
                                 <v-row dense>
                                     <v-col cols="12">
                                         <strong>Translation:</strong>
                                         {{ translation.text }}
                                     </v-col>
                                     <v-col cols="12">
-                                        <div v-for="(w, i) in translation.words" :key="i"
-                                             class="mb-2">
-                                            {{ i + 1 }}.
-                                            "<strong>{{ w.source }}</strong>",
-                                            {{ w.target }}
-                                            <span class="text-caption"
-                                                  :title="formatPartOfSpeech(w).long">
-                                                ({{ formatPartOfSpeech(w).short }})
-                                            </span>
-                                        </div>
+                                        <v-list dense two-line>
+                                            <v-list-item v-for="(w, i) in translation.words" :key="i"
+                                                         class="px-0"
+                                                         style="min-height: 0;">
+                                                <v-list-item-avatar color="primary"
+                                                                    size="24"
+                                                                    class="ma-0 me-4"
+                                                                    style="color: white">
+                                                    {{ i + 1 }}
+                                                </v-list-item-avatar>
+                                                <v-list-item-content>
+                                                    <v-list-item-title>
+                                                        "<strong>{{ w.source }}</strong>"
+                                                        <span class="mx-1">{{ w.target }}</span>
+                                                        <span class="text-caption font-weight-light"
+                                                              :title="formatPartOfSpeech(w).long">
+                                                            ({{ formatPartOfSpeech(w).short }})
+                                                        </span>
+                                                    </v-list-item-title>
+                                                    <v-list-item-subtitle>
+                                                        {{ w.alternatives.join(", ") }}
+                                                    </v-list-item-subtitle>
+                                                </v-list-item-content>
+                                            </v-list-item>
+                                        </v-list>
                                     </v-col>
                                 </v-row>
                             </v-card-text>
                             <v-card-text v-else>
-                                Select text to translate.
+                                <v-alert type="info">
+                                    <div>Highlight text on the right to translate.</div>
+                                    <small>Please note that the source and target languages must be different.</small>
+                                </v-alert>
                             </v-card-text>
 
                             <v-overlay absolute
@@ -223,7 +245,7 @@
 import {
     Component,
     Ref,
-    Vue,
+    Vue, Watch,
 } from "vue-property-decorator";
 
 import rangy from "rangy";
@@ -231,18 +253,15 @@ import rangy from "rangy";
 import { getModule } from "vuex-module-decorators";
 import {
     AppModule,
-    IWord,
+    IDictionaryEntry,
     ITranslation,
-    postpone, IDictionaryEntry,
+    IWord,
+    postpone,
 } from "@/store/app";
 
 const PLAYER_TICK_INTERVAL_MS = 100;
 const MAX_RECORDING_TIMEOUT_MS = 30_000;
 
-// TODO: - Make playback speed changeable
-//       - Auto-scroll current word into view
-//       - When clicked/hovered on word, show FABs like 'go to (seek)', 'play', 'record'.
-//       - When words are selected, show FABs, e.g. 'play'. Then only play exactly this part.
 @Component
 export default class HomeView extends Vue {
     private readonly app = getModule(AppModule);
@@ -259,7 +278,6 @@ export default class HomeView extends Vue {
     private nativeTickInterval = 0;
     private nativeRecordingTimeout = 0;
 
-    // TODO: Move out into Vuex.
     private currentWord: IWord | null = null;
     private selectedRange: [IWord, IWord] | null = null;
     private currentPlayRange: [number, number] | null = null;
@@ -268,6 +286,7 @@ export default class HomeView extends Vue {
     private recordingDuration = 0;
 
     private translation: ITranslation | null = null;
+    private translationPending = false;
 
     private get recordingDurationPercentage() {
         return this.recordingDuration / (MAX_RECORDING_TIMEOUT_MS / 1000) * 100;
@@ -395,12 +414,19 @@ export default class HomeView extends Vue {
         postpone(async () => {
             this.selectedRange = savedRange;
 
-            // TODO: Debounce.
-            this.translation = null;
-            this.translation = await this.app.doTranslate({
-                words: this.selectedWords.map(w => w.display),
-                targetLanguage: this.app.language,
-            });
+            if(this.app.sourceLanguage !== this.app.targetLanguage) {
+                this.translation = null;
+                this.translationPending = true;
+                try {
+                    this.translation = await this.app.doTranslate({
+                        words: this.selectedWords.map(w => w.display),
+                        sourceLanguage: this.app.sourceLanguage,
+                        targetLanguage: this.app.targetLanguage,
+                    });
+                } finally {
+                    this.translationPending = false;
+                }
+            }
         });
     }
 
@@ -513,6 +539,13 @@ export default class HomeView extends Vue {
         }
 
         await this.startRecording();
+    }
+
+    @Watch("app.sourceLanguage")
+    @Watch("app.targetLanguage")
+    private onLanguageChanged() {
+        this.translation = null;
+        this.selectedRange = null;
     }
 
     async mounted(): Promise<void> {

@@ -249,7 +249,7 @@ export default class VideoSelectionDialog extends Vue {
     }
 
     private onStart() {
-        if(this.selectedVideoIndex === null || this.selectedVideoIndex === undefined) {
+        if(this.selectedVideoIndex === null) {
             return;
         }
 
@@ -258,7 +258,10 @@ export default class VideoSelectionDialog extends Vue {
             : [this.customVideoInfo, ...this.featuredVideos][this.selectedVideoIndex];
 
         this.app.doQueueAppBlockingAction({
-            action: this.app.doTranscribe({videoId: video.videoId}),
+            action: this.app.doTranscribe({
+                videoId: video.videoId,
+                sourceLanguage: this.app.sourceLanguage,
+            }),
         });
 
         this.visible = false;
