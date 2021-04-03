@@ -28,10 +28,28 @@
                             </div>
                         </v-col>
                         <v-col cols="12">
-                            <v-text-field dense outlined clearable hide-details
-                                          placeholder="https://www.youtube.com/watch?v=…"
-                                          :rules="youTubeVideoIdRules"
-                                          @input="onVideoUrlChanged" />
+                            <v-layout row class="px-3">
+                                <v-text-field dense outlined clearable hide-details
+                                              placeholder="https://www.youtube.com/watch?v=…"
+                                              :rules="youTubeVideoIdRules"
+                                              @input="onVideoUrlChanged" />
+                                <v-select dense outlined hide-details
+                                          class="ms-2"
+                                          style="max-width: 220px"
+                                          item-value="code"
+                                          item-text="name"
+                                          :value="app.sourceLanguage"
+                                          :items="languages"
+                                          :disabled="app.recording"
+                                          @change="onChangeSourceLanguage">
+                                    <template v-slot:prepend-inner>
+                                        <v-icon small
+                                                class="mt-1 me-1">
+                                            mdi-translate
+                                        </v-icon>
+                                    </template>
+                                </v-select>
+                            </v-layout>
                         </v-col>
                         <v-col cols="12" class="pt-1 text-caption">
                             <v-icon small color="info">mdi-information-outline</v-icon>
@@ -151,7 +169,7 @@ import { getModule } from "vuex-module-decorators";
 import {
     AppModule,
     extractYouTubeVideoIdFromUrl,
-    IVideoInfo,
+    IVideoInfo, SUPPORTED_LANGUAGES, SupportedLanguage,
 } from "@/store/app";
 
 @Component
@@ -169,6 +187,7 @@ export default class VideoSelectionDialog extends Vue {
             thumbnailUrl: "https://i.ytimg.com/vi/h4T_LlK1VE4/hqdefault.jpg",
             title: "Glitterbomb 3.0 vs. Porch Pirates",
             author: "Mark Rober",
+            language: "en",
         },
         {
             videoId: "TfVYxnhuEdU",
@@ -176,6 +195,7 @@ export default class VideoSelectionDialog extends Vue {
             thumbnailUrl: "https://i.ytimg.com/vi/TfVYxnhuEdU/hqdefault.jpg",
             title: "I asked an AI for video ideas, and they were actually good",
             author: "Tom Scott",
+            language: "en",
         },
         {
             videoId: "OmCzZ-D8Wdk",
@@ -183,6 +203,7 @@ export default class VideoSelectionDialog extends Vue {
             thumbnailUrl: "https://i.ytimg.com/vi/OmCzZ-D8Wdk/hqdefault.jpg",
             title: "Gimbal Lock and Apollo 13",
             author: "The Vintage Space",
+            language: "en",
         },
         {
             videoId: "O37yJBFRrfg",
@@ -190,6 +211,7 @@ export default class VideoSelectionDialog extends Vue {
             thumbnailUrl: "https://i.ytimg.com/vi/O37yJBFRrfg/hqdefault.jpg",
             title: "The European Union Explained*",
             author: "CGP Grey",
+            language: "en",
         },
         {
             videoId: "uxPdPpi5W4o",
@@ -197,6 +219,7 @@ export default class VideoSelectionDialog extends Vue {
             thumbnailUrl: "https://i.ytimg.com/vi/uxPdPpi5W4o/hqdefault.jpg",
             title: "Why Are 96,000,000 Black Balls on This Reservoir?",
             author: "Veritasium",
+            language: "en",
         },
     ];
 
@@ -219,6 +242,10 @@ export default class VideoSelectionDialog extends Vue {
         }
     }
 
+    private get languages() {
+        return SUPPORTED_LANGUAGES;
+    }
+
     private get groupKey() {
         return [this.customVideoInfo, ...this.featuredVideos]
             .map(v => v?.videoId)
@@ -233,6 +260,10 @@ export default class VideoSelectionDialog extends Vue {
 
     show(): void {
         this.visible = true;
+    }
+
+    private onChangeSourceLanguage(code: SupportedLanguage) {
+        this.app.setSourceLanguage(code);
     }
 
     private async onVideoUrlChanged(url: string) {

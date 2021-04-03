@@ -21,6 +21,14 @@ export type PronunciationError = "none" | "omission" | "insertion" | "mispronunc
 
 export type SupportedLanguage = "en" | "de" | "fr" | "it" | "pt";
 
+export const SUPPORTED_LANGUAGES: Array<{ code: SupportedLanguage; name: string }> = [
+    {code: "en", name: "English"},
+    {code: "de", name: "German"},
+    {code: "fr", name: "French"},
+    {code: "it", name: "Italian"},
+    {code: "pt", name: "Portuguese"},
+];
+
 export interface IPronunciationScore {
     accuracy: number;
     error: PronunciationError;
@@ -46,6 +54,7 @@ export interface IVideoInfo {
     thumbnailUrl: string;
     title: string;
     author: string;
+    language: SupportedLanguage;
 }
 
 export interface IDictionaryEntry {
@@ -224,6 +233,7 @@ export class AppModule extends VuexModule {
                 thumbnailUrl: response.data?.thumbnail_url || "",
                 title: response.data?.title || "",
                 author: response.data?.author_name || "",
+                language: "en",
             };
         } catch(e) {
             return null;

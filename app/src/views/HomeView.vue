@@ -49,7 +49,7 @@
                                 <v-row dense>
                                     <v-col cols="12">
                                         <strong>Translation:</strong>
-                                        {{ translation.text }}
+                                        "{{ translation.text }}"
                                     </v-col>
                                     <v-col cols="12">
                                         <v-list dense two-line>

@@ -40,7 +40,7 @@
             <v-select dense outlined hide-details
                       class="me-2"
                       style="max-width: 220px"
-                      prefix="From:"
+                      prefix="To:"
                       item-value="code"
                       item-text="name"
                       :value="app.targetLanguage"
@@ -108,6 +108,7 @@ import { getModule } from "vuex-module-decorators";
 import {
     AppModule,
     SupportedLanguage,
+    SUPPORTED_LANGUAGES,
 } from "@/store/app";
 
 import VideoSelectionDialog from "@/views/dialogs/VideoSelectionDialog.vue";
@@ -122,14 +123,8 @@ import AppBlockingDialog from "@/views/dialogs/AppBlockingDialog.vue";
 export default class App extends Vue {
     private readonly app = getModule(AppModule);
 
-    private get languages(): Array<{ code: SupportedLanguage; name: string }> {
-        return [
-            {code: "en", name: "English"},
-            {code: "de", name: "German"},
-            {code: "fr", name: "French"},
-            {code: "it", name: "Italian"},
-            {code: "pt", name: "Portuguese"},
-        ];
+    private get languages() {
+        return SUPPORTED_LANGUAGES;
     }
 
     @Ref("videoSelectionDialog") private readonly videoSelectionDialogRef!: VideoSelectionDialog;
