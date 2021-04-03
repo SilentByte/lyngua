@@ -27,8 +27,8 @@ a:focus, a:hover {
     /*color: #5e35b1 !important;*/
 }
 
-#mainNav a.nav-link:hover {
-    /*color: #5e35b1 !important;*/
+#mainNav.navbar-shrink a.nav-link:hover {
+    color: #f4511e !important;
 }
 
 @media (min-width: 992px) {
