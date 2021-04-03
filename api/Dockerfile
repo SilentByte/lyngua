@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8-slim
 ENV APP_MODULE="lyngua_api:app"
 COPY requirements.txt requirements.txt
 RUN apt update -y && apt-get install ffmpeg -y && pip3 install -r requirements.txt
