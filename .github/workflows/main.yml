@@ -29,10 +29,10 @@ jobs:
 
 
   build:
-    name: Hello world action
+    name: Hello_world_action
     runs-on: ubuntu-latest
     steps:
-      - id: npm build
+      - id: npm_build
         run: sh build.sh
 
       - name: Azure Login
