@@ -17,7 +17,6 @@ azure_languages = dict(
     pt="portuguese"
 )
 
-
 class TranslateDict(TypedDict):
     Text: str
     Translation: str
@@ -108,6 +107,20 @@ class TranslatorAPI():
             headers=header)
         response.raise_for_status()
         return [TranslationResponse(**x) for x in response.json()]
+
+    def translate_full_sentence(self,full_sentence:str,from_language:str,to_language:str) -> str:
+        header = self.headers.copy()
+        header['charset'] = 'UTF-8'
+        for language in [from_language, to_language]:
+            if language.lower() not in azure_languages.keys():
+                raise KeyError(f"{self.translate_endpoint}/translate?api-version=3.0&from={from_language}&to={to_language}")
+        response = requests.post(
+            url=f"{self.translate_endpoint}/translate?api-version=3.0&from={from_language}&to={to_language}",
+            data=dumps([dict(Text=full_sentence)]),
+            headers=header)
+        response.raise_for_status()
+        return response.json()[0]['translations'][0]['text']
+
 
     def dictionary_lookup(self, words: List[TranslateDict], from_language: str, to_language: str):
         # Wrapper for the private method to ensure that I only send 10 (limit of API) words at a time

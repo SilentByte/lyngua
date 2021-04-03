@@ -34,15 +34,27 @@ def fix_data(data: dict) -> List[dict]:
     words = data['NBest'][0]['Words']  # only ever have one item in the list
     return [dict(Word=x['Word'], Offset=x['Offset'], Duration=x['Duration']) for x in words]
 
-
+# https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support#speech-to-text
+azure_languages = dict(
+    en="en-us",
+    de="de-de",
+    fr="fr-fr",
+    it="it-it",
+    pt="pt-br"
+)
 @get_video_router.get("/getvideo/")
 def getvideo(v: str, l: Optional[str]):
     data = None
     video = v
+
+    ## We're sending languages as the short form. We want the long form,
+
     if l is None:
+        # Default to english if missing
         language='en-US'
     else:
-        language= l
+        language = azure_languages[l.lower()]
+
     logging.info(f'Python HTTP trigger function processed a request. video {video}')
     # Lots of possible video formats
     # video_code = strip_video(video)

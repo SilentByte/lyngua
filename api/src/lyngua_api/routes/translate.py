@@ -31,4 +31,6 @@ def translatev2(req: TranslateFormat):
 
         words = api.dictionary_lookup(words=translation_storage, from_language=req.from_language,
                                       to_language=req.to_language)
-        return words
+
+        return dict(words=words,
+                    text=api.translate_full_sentence(" ".join(req.text_to_translate), language_code, req.to_language))
