@@ -42,7 +42,7 @@ azure_languages = dict(
     it="it-it",
     pt="pt-br"
 )
-@get_video_router.get("/getvideo/")
+@get_video_router.get("/getvideo")
 def getvideo(v: str, l: Optional[str]):
     data = None
     video = v
