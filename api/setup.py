@@ -24,6 +24,4 @@ setup(
     packages=find_packages(where='src'),
     python_requires=">=3.7",
     platforms="windows",
-    entry_points={'console_scripts': [
-    ]}
 )

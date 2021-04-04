@@ -1,2 +1,4 @@
 dist/
 
+/api/src/lyngua_API.egg-info/
+/api/src/lyngua_api.egg-info/
