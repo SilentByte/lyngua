@@ -20,7 +20,7 @@ class TestSpeechFunctions(TestCase):
         cls.video_text = "It's over Anakin I have the high ground. You underestimate my power. Don't try it"
 
     def test_sst(self):
-        response = self.api.speech_to_text(wav_data=self.video,language='en-us')
+        response = self.api.speech_to_text(wav_data=self.video, language='en-us')
         self.assertEquals(response.RecognitionStatus, 'Success')
 
     def test_pronounciation(self):
@@ -64,6 +64,7 @@ class TestFunction(TestCase):
                    to_language="de"
                    ))
         translatev2(input)
+
     def test_translate_v2_guess_short(self):
         input = TranslateFormat(
             **dict(text_to_translate="I literally just".split(" "),

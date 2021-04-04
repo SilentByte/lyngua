@@ -9,6 +9,7 @@ from docker.models.containers import Container
 from time import sleep, time
 import requests
 import pytest
+
 docker_client = docker.from_env()
 from os import getenv
 
@@ -28,7 +29,7 @@ class DockerContainerMixin(object):  # todo start
     def build_container(cls, file_path: Path) -> str:
         if not file_path.exists():
             raise OSError(f"Expected to find a Dockerfile at {file_path}")
-        image, _ = docker_client.images.build(path=str(file_path.parent), timeout=300) # assuming speedy internet
+        image, _ = docker_client.images.build(path=str(file_path.parent), timeout=300)  # assuming speedy internet
         return image.id
 
     @classmethod
@@ -79,10 +80,12 @@ class TestStuff(TestCase, DockerContainerMixin):
     @classmethod
     def setUpClass(cls) -> None:
         cls.setup_container()
+
     def setUp(self) -> None:
         # I keep getting 429'd because my tests run too fast
         sleep(5)
-    @pytest.skip("annoying to test in CI")
+
+    @pytest.mark.skip("annoying to test in CI")
     def test_getvideodata(self):
         resp = requests.get(f'http://127.0.0.1:8080/getvideo/?v={self.address}&l=en-us')
         self.assertEqual(resp.status_code, 200)
@@ -90,13 +93,13 @@ class TestStuff(TestCase, DockerContainerMixin):
     def test_translate(self):
         text = "Rico I am 100% sure that the translate API supports more than 10 words at a time."
         resp = requests.post('http://127.0.0.1:8080/translatev2/', data=dumps(dict(text_to_translate=text.split(" "),
-                                                                                 from_language="en",
-                                                                                 to_language="de")))
+                                                                                   from_language="en",
+                                                                                   to_language="de")))
         self.assertEqual(resp.status_code, 200)
         print(resp)
 
         resp = requests.post('http://127.0.0.1:8080/translatev2/', data=dumps(dict(text_to_translate=text.split(" "),
-                                                                                 to_language="de")))
+                                                                                   to_language="de")))
         self.assertEqual(resp.status_code, 200)
 
     def test_pronounce(self):
