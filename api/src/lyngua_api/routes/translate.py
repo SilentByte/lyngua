@@ -15,7 +15,7 @@ class TranslateFormat(BaseModel):
     to_language: str
 
 
-@translate_router.post("/translatev2/")
+@translate_router.post("/translatev2")
 def translatev2(req: TranslateFormat):
     if req.from_language is None:
         language = api.discover_language(" ".join(req.text_to_translate))
