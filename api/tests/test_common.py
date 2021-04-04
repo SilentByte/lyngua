@@ -16,11 +16,11 @@ class TestSpeechFunctions(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.api = SpeechAPI()
-        cls.video = fetch_youtube_audio(video_id='Vxlci1d2rOg')
+        cls.video = fetch_youtube_audio(video_id='7Ood-IE7sx4')
         cls.video_text = "It's over Anakin I have the high ground. You underestimate my power. Don't try it"
 
     def test_sst(self):
-        response = self.api.speech_to_text(wav_data=self.video)
+        response = self.api.speech_to_text(wav_data=self.video,language='en-us')
         self.assertEquals(response.RecognitionStatus, 'Success')
 
     def test_pronounciation(self):
