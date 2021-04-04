@@ -19,9 +19,9 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and push
         id: docker_build
-        context: api/
         uses: docker/build-push-action@v2
         with:
+          context: api/
           push: true
           tags: stephenmo/lyngua:latest
       - name: Image digest
