@@ -19,7 +19,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - id: switch_working_directory
         run: cd app
-
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
