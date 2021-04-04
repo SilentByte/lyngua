@@ -83,9 +83,9 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-- name: Upload to blob storage
-      uses: azure/CLI@v1
-      with:
-        azcliversion: 2.0.72
-        inlineScript: |
-          az storage blob upload-batch --account-name ${{ secrets.AZURE_STATIC_SITE_ACCOUNT }} -d '$web' -s dist
+      - name: Upload to blob storage
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.0.72
+          inlineScript: |
+            az storage blob upload-batch --account-name ${{ secrets.AZURE_STATIC_SITE_ACCOUNT }} -d '$web' -s dist
