@@ -22,14 +22,7 @@
                                      nocookie
                                      width="100%"
                                      height="100%"
-                                     :video-id="app.videoId"
-                                     @ready="onPlayerReady"
-                                     @ended="onPlayerEnded"
-                                     @playing="onPlayerPlaying"
-                                     @paused="onPlayerPaused"
-                                     @buffering="onPlayerBuffering"
-                                     @cued="onPlayerCued"
-                                     @error="onPlayerError" />
+                                     :video-id="app.videoId" />
 
                             <v-overlay absolute
                                        opacity="0.8"
@@ -433,34 +426,6 @@ export default class HomeView extends Vue {
         });
     }
 
-    private onPlayerReady() {
-        console.log("onPlayerReady");
-    }
-
-    private onPlayerEnded() {
-        console.log("onPlayerEnded");
-    }
-
-    private onPlayerPlaying() {
-        console.log("onPlayerPlaying");
-    }
-
-    private onPlayerPaused() {
-        console.log("onPlayerPaused");
-    }
-
-    private onPlayerBuffering() {
-        console.log("onPlayerBuffering");
-    }
-
-    private onPlayerCued() {
-        console.log("onPlayerCued");
-    }
-
-    private onPlayerError() {
-        console.log("onPlayerError");
-    }
-
     private async onTick() {
         this.recordingDuration = (Date.now() - this.recordingStartTimestamp) / 1000;
 
@@ -542,6 +507,11 @@ export default class HomeView extends Vue {
         }
 
         await this.startRecording();
+    }
+
+    @Watch("app.videoId")
+    private onVideoChanged() {
+        this.selectedRange = null;
     }
 
     @Watch("app.sourceLanguage")

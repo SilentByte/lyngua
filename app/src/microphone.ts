@@ -140,7 +140,6 @@ export class Recorder {
 
     private encode() {
         const buffer = this.mergeSampleBuffers();
-        console.log(buffer.length);
 
         const blob = new ArrayBuffer(44 + buffer.length * 2);
         const view = new DataView(blob);

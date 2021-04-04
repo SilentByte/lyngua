@@ -249,8 +249,6 @@ export class AppModule extends VuexModule {
             },
         });
 
-        console.log(response);
-
         this.context.commit("setVideoId", payload.videoId);
         this.context.commit("setTranscription", hint<ITranscription>({
             audioUrl: "",
