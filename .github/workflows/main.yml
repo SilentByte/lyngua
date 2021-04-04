@@ -19,26 +19,24 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - id: what_directories
         run: ls
-      - id: switch_working_directory
-        run: cd api
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
         with:
+          context: api
+          file: api/Dockerfile
           push: true
           tags: stephenmo/lyngua:latest
-      - id: switch_working_directory_back
-        run: cd ..
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
 
 
   build:
-    name: Hello_world_action
+    name: Website_Push
     runs-on: ubuntu-latest
     steps:
       - id: npm_build
-        run: sh build.sh
+        run: ./build.sh
 
       - name: Azure Login
         uses: azure/login@v1
