@@ -12,7 +12,7 @@ class InputFormat(BaseModel):
     data:str
     words: str
 
-@pronounce_router.post("/pronounce/")
+@pronounce_router.post("/pronounce")
 def pronounce(text: InputFormat):
     data = base64.b64decode(text.data)
     words = text.words
