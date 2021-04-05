@@ -60,7 +60,7 @@ def getvideo(v: str, l: Optional[str]):
     # video_code = strip_video(video)
     video_code = v
     logging.info(f'Video code {video_code}')
-    data = blob.get_blob(video_code)
+    data = blob.get_blob(video_code + language)
     if data is None:
         vid = audio.fetch_youtube_audio(video_code)
         try:
@@ -69,5 +69,5 @@ def getvideo(v: str, l: Optional[str]):
             # Normal errors will 500 out
             data = []
 
-        blob.insert_blob(blobname=video_code, data=data)
+        blob.insert_blob(blobname=video_code + language, data=data)
     return fix_data(data)

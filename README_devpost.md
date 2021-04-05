@@ -5,6 +5,8 @@
 [![Version](https://img.shields.io/badge/version-1.0-05A5CC.svg?style=for-the-badge)](https://lyngua.silentbyte.com)&nbsp;
 [![Status](https://img.shields.io/badge/status-live-00B20E.svg?style=for-the-badge)](https://lyngua.silentbyte.com)
 [![Dockerfile](https://img.shields.io/docker/pulls/stephenmo/lyngua?style=for-the-badge)](https://img.shields.io/docker/pulls/stephenmo/lyngua)
+[![Deploy](https://img.shields.io/github/workflow/status/SilentByte/lyngua/main?label=Deploy&style=for-the-badge)](https://github.com/SilentByte/lyngua/actions/workflows/main.yml)
+
 
 # Lyngua
 
