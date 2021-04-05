@@ -1,5 +1,5 @@
 
-![Lyngua](https://github.com/SilentByte/lyngua/tree/master/docs/lyngua.png)
+![Lyngua](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/lyngua.png)
 
 [![Lyngua](https://img.shields.io/badge/app-lyngua-f4511e.svg?style=for-the-badge)](https://lyngua.silentbyte.com)&nbsp;
 [![Version](https://img.shields.io/badge/version-1.0-05A5CC.svg?style=for-the-badge)](https://lyngua.silentbyte.com)&nbsp;
@@ -21,7 +21,7 @@ To assist you in your learning, Lyngua will handily provide you with a set of tr
 
 This process is a lot more entertaining and directed as you’re the one who chooses the content.
 
-![bored to happy](https://github.com/SilentByte/lyngua/tree/master/docs/bored_to_happy.png)
+![bored to happy](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/bored_to_happy.png)
 
 **A Pug before and after using Lyngua to learn a new language**
 
@@ -31,15 +31,15 @@ Features include:
 
 * Words are highlighted as they are being said in the video (Using Azure speech-to-text transcriptions).
 
-![](https://github.com/SilentByte/lyngua/tree/master/docs/words.gif)
+![](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/words.gif)
 
 * Pronunciation scoring to see which words the user is having trouble pronouncing correctly.
 
-![](https://github.com/SilentByte/lyngua/tree/master/docs/pronounce.png)
+![](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/pronounce.png)
 
 * Translation and alternate back-translation for context.
 
-![](https://github.com/SilentByte/lyngua/tree/master/docs/translation.png)
+![](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/translation.png)
 
 Lyngua currently supports the following languages due to the limitations of what's supported by Azure for the 
 functionality we need:
@@ -59,7 +59,7 @@ We had a few goals with this project:
 
 Keep costs low, and where possible, utilize free tiers or low cost services over the most performant ones. Looking at our spending, we did pretty well on this front:
 
-![Spending](https://github.com/SilentByte/lyngua/tree/master/docs/spending.png) 
+![Spending](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/spending.png) 
 
 
 ### Build something fun and useful
@@ -84,7 +84,7 @@ learn at least one language, doing something around learning languages seemed wo
 Lyngua is split into two separate components. The website is written in TypeScript with Vue as the front-end framework and the back-end API which is a python docker container powered by FastAPI.
 
 
-![Architecture](https://github.com/SilentByte/lyngua/tree/master/docs/ArchitectureDiagram.png)
+![Architecture](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/ArchitectureDiagram.png)
 
 
 ### Website
@@ -96,7 +96,7 @@ The TypeScript/Vue/Vuetify source code is available in the ```app``` folder.
 
 ### API
 
-![Architecture](https://github.com/SilentByte/lyngua/tree/master/docs/API_arch.png)
+![Architecture](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/API_arch.png)
 
 The back-end API is hosted as an [Azure App Service WebApp](https://docs.microsoft.com/en-us/azure/app-service/overview).
 This API is deployed as a [custom docker container](https://docs.microsoft.com/en-us/azure/app-service/quickstart-custom-container?pivots=container-linux) called [lyngua](https://hub.docker.com/r/stephenmo/lyngua)
@@ -106,7 +106,7 @@ This back-end API is responsible for exposing three public endpoints which coord
 
 ### GetVideo
 
-![GetVideo](https://github.com/SilentByte/lyngua/tree/master/docs/GetVideo.png)
+![GetVideo](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/GetVideo.png)
 
 The GetVideo endpoint is responsible for generated the Speech to Text (STT) transcription using the [Azure Cognitive Services Speech API](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-speech-to-text).
 
@@ -125,7 +125,7 @@ multiple users may be requesting.
 
 
 ### Pronounce 
-![Pronounce](https://github.com/SilentByte/lyngua/tree/master/docs/PronounceCall.png)
+![Pronounce](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/PronounceCall.png)
 
 The pronunciation endpoint takes in audio recorded from the user's microphone along with the ground truth set of words 
 established by the users selection and sends them to [Azure Cognitive Services Speech API in detailed mode](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-speech-to-text#pronunciation-assessment-parameters).
@@ -136,7 +136,7 @@ Lyngua will then show a list of words that the user has not pronounced correctly
 
 ### Translate
 
-![Translate](https://github.com/SilentByte/lyngua/tree/master/docs/Translate.png)
+![Translate](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/Translate.png)
 
 The translate endpoint uses two different services under the [Azure Cognitive Services Translate API](https://docs.microsoft.com/en-us/azure/cognitive-services/translator/)
 banner.
@@ -209,7 +209,7 @@ This hackathon will mark the first time that we set up Continous Deployment in a
 "can you push the changes to prod" blocker that we've encountered in the past. This will also be the first time that we 
 have tried setting up Github Actions as a CICD runner as we've previously only used Jentinks, Teamcity and TravisCI.
 
-![CD](https://github.com/SilentByte/lyngua/tree/master/docs/CD.png)
+![CD](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/CD.png)
 
 Our Github actions automate the deployment of the website and back-end API.
 
@@ -228,7 +228,7 @@ incorporate it into our personal projects.
 
 As a result of the things Stephen learnt on this project he ended up completing his [Azure Certified Developer Associate Certificate](https://www.credly.com/badges/a50a6ac7-486d-40a4-84a7-b8c9e783ec5c?source=linked_in_profile).
 
-![Developer Associate](https://github.com/SilentByte/lyngua/tree/master/docs/DeveloperAssociate.png)
+![Developer Associate](https://raw.githubusercontent.com/SilentByte/lyngua/master/docs/DeveloperAssociate.png)
 
 ## Build Instructions
 
