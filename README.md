@@ -35,7 +35,7 @@ Features include:
 
 * Pronunciation scoring to see which words the user is having trouble pronouncing correctly.
 
-![](docs/pronounce3.png)
+![](docs/pronounce2.png)    
 
 * Translation and alternate back-translation for context.
 
