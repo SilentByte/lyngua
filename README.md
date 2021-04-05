@@ -10,17 +10,30 @@
 
 Lyngua is a novel, AI-driven language learning experience powered by [Microsoft Azure Cognitive Services](https://azure.microsoft.com/en-au/services/cognitive-services/). This repository represents our submission for the [Microsoft Azure AI Hackathon](https://azureai.devpost.com/).
 
-This project is live at https://lyngua.silentbyte.com/.
+This project is live at [https://lyngua.silentbyte.com/](https://lyngua.silentbyte.com/).
 
 
 ## Inspiration
-TODO
+
+![](docs/mittwoch.png)
 
 
 ## What it does
-Lyngua empowers users to learn languages at their own pace, using content that they find engaging.
+Lyngua is a more interactive way for integrated language learning through interesting materials provided by your 
+favorite YouTube content creators. Lyngua leverages the power of Microsoft Azure Cognitive Services which include 
+speech to text for video transcription, pronunciation recognition and translation.
+
+Lyngua empowers users to learn languages at their own pace using content that they find engaging.
+
 ![bored to happy](docs/bored_to_happy.png)
 **A Pug before and after using Lyngua to learn a new language**
+
+Features include:
+* Speech that highlights text as the user is speaking
+# IMAGE HERE
+* Pronunciation checks to see if users are pronouncing words properly
+## Image HERE
+* Translation and alternate back translations
 
 
 ## Goals
