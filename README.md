@@ -18,7 +18,9 @@ TODO
 
 
 ## What it does
-TODO
+Lyngua empowers users to learn languages at their own pace, using content that they find engaging.
+![bored to happy](docs/bored_to_happy.png)
+**A Pug before and after using Lyngua to learn a new language**
 
 
 ## Goals
@@ -172,80 +174,136 @@ TODO
 
 ## Build Instructions
 ### Installing build tools
-* NPM
-* Docker
+* [Install NPM](https://www.npmjs.com/get-npm)
+* [Install Docker](https://docs.docker.com/get-docker/)
+* [Install Python3.8](https://www.python.org/downloads/)
+* [Install Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 * Azure CLI
 * Environment Variables used by commands
 
 $AZURE_LOCATION = westus
 $AZURE_RG_NAME = lyngua_rg
+$AZURE_WEB_STORAGE = WebsiteStoarage
+$AZURE_BLOB_STORAGE = LynguaBlobStorage
 ### Setting up Infrastructure
 ### Set up your resource group
 The resource group is the "container" that holds all the various azure resource you're going to create.
 ```az group create --name $AZURE_RG_NAME --location $AZURE_LOCATION```
 
-[Documentation link](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-cli)
+[Documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-cli)
 #### Setting up your cognitive services
-&& TODO ON BOTH OF THESE: CHECK SKU
-For the purpose of setting this up, i'll use the free SKU, it's worth brushing up on the limits for translate and speech TODO LINKS.
+For the purposes of this we will be using the Free (F0) tier. It's worth understanding the limits of this for the [Speech](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-services-quotas-and-limits) 
+and [Translate](https://docs.microsoft.com/en-us/azure/cognitive-services/translator/request-limits) APIs to figure out if you should go up a tier.
 
-
-Create your Speech Services resource and get the required key
+Create your Speech Services resource and Translate resources
 ```
-az cognitiveservices account create --name speechapi --resource-group $AZURE_RG_NAME --kind SpeechServices --sku f1 \
+az cognitiveservices account create --name speechapi --resource-group $AZURE_RG_NAME --kind SpeechServices --sku F0 \
 --location $AZURE_LOCATION
-
+az cognitiveservices account create --name translateapi --resource-group $AZURE_RG_NAME --kind TextTranslation --sku F0 \
+--location $AZURE_LOCATION
+```
+Get your keys for your two services, you will need these later.
+```
+az cognitiveservices account keys list --name translateapi --resource-group $AZURE_RG_NAME
 az cognitiveservices account keys list --name speechapi --resource-group $AZURE_RG_NAME
 ```
-Create your Text Translation resource and get the required key
-```
-az cognitiveservices account create --name translateapi --resource-group $AZURE_RG_NAME --kind TextTranslation --sku f1 \
---location $AZURE_LOCATION
-az cognitiveservices account keys list --name translateapi --resource-group $AZURE_RG_NAME
-```
+
 [Documentation](https://docs.microsoft.com/en-us/cli/azure/cognitiveservices/account?view=azure-cli-latest)
 #### Setting up your storage account
-To prevent accidental security issues we're going to create two separate storage accounts, one to hold your cached 
-translations for youtube videos and the other one to serve your accounts. There is minimal additional cost associated 
-with two different accounts as you're only charged for storage, this is mostly to prevent accidents if you set things
-to public when they're not meant to be.
+To prevent accidental security leaks we're going to create two different storage account. One will have public access
+and will be used to host your website, the other one will be used as the blob cache for STT transcriptions.
 
-https://docs.microsoft.com/en-us/cli/azure/storage/account?view=azure-cli-latest#commands
-https://docs.microsoft.com/en-us/cli/azure/storage/container?view=azure-cli-latest
+For the purposes of minimising costs, I will be using the Standard Locally Redundant Storage. It's worth understanding
+the [implications of reliability for this](https://docs.microsoft.com/en-us/rest/api/storagerp/srp_sku_types).
+
 ```
-az storage account create --sku Standard_LRS
+az storage account create --name cache_storage --sku Standard_LRS --resource-group $$AZURE_RG_NAME \
+--location $AZURE_LOCATION --https-only true
+az storage account create --name public_website -sku Standard_LRS --resource-group $$AZURE_RG_NAME \
+--location $AZURE_LOCATION --https-only true --allow-blob-public-access
+```
+Enable static website. This will create a new container called ```$web```.
+```
+az storage blob service-properties update --account-name public_website --static-website --404-document error.html \ 
+--index-document index.html
+```
 
-az storage account create --allow-blob-public-access --sku Standard_LRS
+You should be able to see a blank index on 
+```
+az storage account show --name public_website --resource-group $AZURE_RG_NAME --query "primaryEndpoints.web \
+--output tsv
+```
 az storage container create
 
-az storage blob service-properties update \ 
---account-name soheilstorage \ 
---static-website \ 
---404-document error.html \ 
---index-document index.html
-
+Get the storage account key for your non pubic storage account and save this for later
+``` 
+az storage account keys list --account-name cache_storage --resource-group $AZURE_RG_NAME
 ```
-
 You can skip the rest of this section if you are just doing local development and jump straight to the ```Website``` 
 and ```API``` sections
 
 
 #### Set up App Service
-Create a plan
-```
-az appservice plan
-az webapp create
-az webapp deployment
-az webapp deployment container config --enable-cd true --name MyWebapp --resource-group MyResourceGroup
+Azure App service is used to host the backend API. Similar to previous steps we are using the Free (F1) tier, it's worth
+understanding the [implications](https://azure.microsoft.com/en-gb/pricing/details/app-service/linux/) of this and note
+that it's not the most performant option.
 
 ```
-create a webapp
+az appservice plan create --name myAPI --resource-group $AZURE_RG_NAME --is-linux true --sku F1
+```
+Create the underlying webapp. If you're using a different docker image make sure to replace ```stephenmo/lyngua:latest```.
+```
+az webapp create --resource-group $AZURE_RG_NAME --plan myAPI --name myWebAPP \
+--deployment-container-image-name stephenmo/lyngua:latest
+```
+
+You should be able to test whether it's working by visiting the url/docs
+``` 
+az webapp list --query "[].{hostName: defaultHostName, state: state}"
+```
+
+CORS is a feature that allows a server to say which origins (websites) it is willing to accept requests from. For the 
+purposes of setting up Lyngua, we are allowing all origins for our API. You would want to change this to your website
+if you were running this in production to prevent other people from building something off of your hosted API.
+```
+az webapp cors add --allowed-origins * --resource-group $AZURE_RG_NAME --name myWebAPP
+```
+
 ### Set up CDN
-// create CDN
-// create endpoint
-// rule 1 HTTPS
-// rule 2 redirect
-// Domain
+We're going to use [Azure CDN](https://docs.microsoft.com/en-us/azure/cdn/cdn-dynamic-site-acceleration) to perform 
+dynamic site acceleration, allow us to use a custom domain name and force some rules to ensure we use HTTPS and to 
+allow Cross Origin Resource Sharing.
+
+Create the CDN
+```
+az cdn profile create --resource-group $AZURE_RG_NAME --name myCDN --sku Standard_Microsoft
+```
+Create an endpoint. Origin and origin-host-header should match the url from your storage account gathered via ```az storage account keys list --account-name cache_storage --resource-group $AZURE_RG_NAME```
+```
+az cdn endpoint create --resource-group $AZURE_RG_NAME --name myCDNEndpoint --profile-name myCDN 
+--origin {Output from previous command} --origin-host-header {Output from previous command}
+```
+
+To allow a custom domain you will need to add a CNAME record pointing towards the CDN endpoint URL
+```
+az cdn endpoint show --resource-group $AZURE_RG_NAME --profile-name myCDN --name myCDNEndpoint
+```
+Once your CNAME record has been added you can ensure that the CDN will work with your domain
+```
+az cdn custom-domain create --resource-group $AZURE_RG_NAME --endpoint-name myCDNEndpoint \
+--profile-name myCDN --name website --hostname {YOUR HOSTNAME HERE}
+```
+Force HTTPS
+```
+az cdn custom-domain enable-https --resource-group $AZURE_RG_NAME  --endpoint-name myCDNEndpoint \ 
+--profile-name myCDN --name website 
+```
+Add rule to redirect HTTPS 
+```
+az cdn endpoint rule add -g $AZURE_RG_NAME --name myCDNEndpoint --profile-name myCDN --order 1 --rule-name "redirect" \
+--match-variable RequestScheme --operator Equal --match-values HTTP --action-name "UrlRedirect" \
+--redirect-protocol Https --redirect-type Moved
+```
 
 ### Set up CORS
 CORS (Cross Origin Resource Sharing) is a way of RICO EXPLAIN.
@@ -254,11 +312,14 @@ normally wouldn't do in production (allowing all origins.)
 
 ### Website
 A bash script ```build.sh``` has been added to ```app/``` to automate the running of the commands.
-For this to work locally you will need to include a ```app/.env.development.local``` file to the same directory with the url
-to your backend API, in the form of ```VUE_APP_API_URL=URL_TO_YOUR_API_HERE```.
+For this to work locally you will need an environment variable called VUE_APP_API_URL with the URL of your API.
 
 Once you have built your Website you can then upload it to your Azure Storage account with
-```az storage blob upload-batch --connection-string "YOUR_CONNECTION_STRING_HERE" -d '$web' -s dist```
+```az storage blob upload-batch --connection-string "YOUR_CONNECTION_STRING_HERE" -d '$web' -s dist``` and if you're 
+using Azure CDN you will need to refresh the cache with ```az cdn endpoint purge --resource-group --name  --profile-name --content-paths '/*'```.
+
+An example of this can be found in ```.github/workflows/main.yml``` which is how we're managing automated deployments.
+
 ### API
 If you just run the API locally you can pull it using ```docker pull docker pull stephenmo/lyngua:latest``` and run it
 using ```docker run stephenmo/lyngua:latest -e AZURE_SPEECH_API_KEY= -e AZURE_SPEECH_ENDPOINT= -e AZURE_TRANSLATE_KEY= -e AZURE_STORAGE_CONNECTION_STRING -p 80:8080``` 
@@ -267,15 +328,12 @@ and visiting ```http://localhost:8080``` on your local machine.
 If you wanted to build the included code you would need to run ```docker build``` . inside the ```api``` folder and 
 run the previous docker run command replacing ```stephenmo/lyngua:latest ``` with the name of your container.
 
-Alternately if your environment supports it you can run a non dockerised version by running ```pip3 install -r requirements.txt```
-and ```pip3 install -e .``` inside the ```api``` folder, then run $TODO_CREATE_RUN COMMAND INSTEAD OF python3 somefile.
-
-
 ## Areas for improvement
 ### CICD
 There are a few places that our CICD pipelines could be improved
 * Fixing tests
-    * As outlined in our Challenges we ran into section, we had some difficulty getting one of our main tests working 
+    * As outlined in our Challenges we ran into section, we had some difficulty getting one of our main tests for the 
+    API working properly, we would like to fix this at some point 
   properly due to the way Github Actions is handling escape characters. We would like to fix this up at some point.
 *  Staging deployments
     * Currently our github actions have only a single deployment (prod). App services supports [staging slots](https://docs.microsoft.com/en-us/azure/app-service/deploy-staging-slots)
@@ -295,6 +353,6 @@ Currently our deployment process involves running a set of CLI commands. This co
 
 MIT, see [LICENSE.txt](LICENSE.txt).
 
-
 ## References
-REF https://purple.telstra.com/blog/host-your-static-website-in-azure-storage-using-azure-cli
+Here are a list of non Microsoft/Azure references that we used:
+[Telstra Purple - Host Static Website in Azure storage using Azure CLI](https://purple.telstra.com/blog/host-your-static-website-in-azure-storage-using-azure-cli)

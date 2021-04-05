@@ -69,6 +69,8 @@ jobs:
           inlineScript: |
             az webapp restart --name ${{ secrets.WEBAPP_NAME }} --resource-group ${{ secrets.WEBAPP_RG }}
   build:
+    env:
+      VUE_APP_API_URL: ${{ secrets.VUE_APP_API_URL }}
     if: github.ref == 'refs/heads/master'
     name: Push Website
     runs-on: ubuntu-latest
@@ -89,3 +91,9 @@ jobs:
           azcliversion: 2.0.72
           inlineScript: |
             az storage blob upload-batch --account-name ${{ secrets.AZURE_STATIC_SITE_ACCOUNT }} -d '$web' -s dist
+      - name: Purge CDN content
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.0.72
+          inlineScript: |
+            az cdn endpoint purge --resource-group ${{ secrets.WEBAPP_RG }} --name ${{ secrets.AZURE_CDN_ENDPOINT }} --profile-name ${{ secrets.AZURE_CDN_ENDPOINT }} --content-paths '/*'
