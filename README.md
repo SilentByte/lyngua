@@ -12,29 +12,44 @@ Lyngua is a novel, AI-driven language learning experience powered by [Microsoft 
 
 This project is live at [https://lyngua.silentbyte.com/](https://lyngua.silentbyte.com/).
 
-
-## Inspiration
-
-![](docs/mittwoch.png)
-
-
 ## What it does
-Lyngua is a more interactive way for integrated language learning through interesting materials provided by your 
-favorite YouTube content creators. Lyngua leverages the power of Microsoft Azure Cognitive Services which include 
-speech to text for video transcription, pronunciation recognition and translation.
 
-Lyngua empowers users to learn languages at their own pace using content that they find engaging.
+Lyngua is a more interactive way for integrated language learning through interesting materials provided by your favorite YouTube content creators. Lyngua leverages the power of Microsoft Azure Cognitive Services which include speech to text for video transcription, pronunciation recognition and translation.
+
+Lyngua allows you to select videos created by a native speaker in the language of you choice, which will then be transcribed for you. You can then read along
+with the text as it plays to hear pronunciation of words, then use the microphone functionality to record yourself saying the words, which will then be scored for their correctness, giving you an indication of which words to practice.
+To assist you in your learning, Lyngua will handlily provide you with a set of translations and possible back-translations (similar words that the translation could be).
+
+This process is a lot more entertaining and directed as you’re the one who chooses the content.
 
 ![bored to happy](docs/bored_to_happy.png)
 **A Pug before and after using Lyngua to learn a new language**
 
 Features include:
-* Speech that highlights text as the user is speaking
-# IMAGE HERE
-* Pronunciation checks to see if users are pronouncing words properly
-## Image HERE
-* Translation and alternate back translations
 
+***Examples are shown from the point of view of someone who knows German learning English***
+* Speech that highlights text as words are said in the video (Using Azure Speech to Text transcriptions)
+
+
+![](docs/words.gif)
+
+
+* Pronunciation checks to see which words the user is having trouble pronouncing correctly.
+
+
+![](docs/pronounce.png)
+
+* Translation and alternate back translation for context.
+
+![](docs/translation.png)
+
+Lyngua currently supports the following languages due to the limitations of what's supported by Azure for the 
+functionality we need:
+* English
+* German
+* French
+* Italian
+* Portuguese
 
 ## Goals
 We had a few goals with this project
@@ -101,7 +116,7 @@ multiple users may be requesting.
 ### Pronounce 
 ![Pronounce](docs/PronounceCall.png)
 
-The pronounciation endpoint takes in audio recorded from the users microphone along with the ground truth set of words 
+The pronunciation endpoint takes in audio recorded from the users microphone along with the ground truth set of words 
 established by the users selection and sends them to [Azure Cognitive Services Speech API in detailed mode](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-speech-to-text#pronunciation-assessment-parameters).
 Lyngua will then show a list of words that the user has not pronounced correctly, and the confidence of that prediction.
 
@@ -158,8 +173,14 @@ and [Build and push Docker images](https://github.com/marketplace/actions/build-
 These actions can be found in ```.github/workflows/main.yml```
 
 ### Microphone
-{{RICO}}
-###
+Accessing the microphone from the browser requires the use of specific APIs that are still evolving and may vary between
+different browsers, so getting microphone recording to work properly was a bit difficult to get working.
+
+Voice data comes in as raw samples that have to be processed first. By looking at the amplitude 
+over time we can calculate the peak and use this information to visualize the input to give the user an indication that
+the microphone is recording. The sampled amplitudes are also copied over into a custom buffer that is then manually 
+encoded as a WAV file before being sent to the back-end.
+
 ## Accomplishments that we're proud of
 ### Setting up Continuous Deployment
 This hackathon will mark the first time that we set up Continous Deployment in an effort to stop the usual 
@@ -171,6 +192,9 @@ have tried setting up Github Actions as a CICD runner as we've previously only u
 ### Github Actions
 This was a good chance for us to learn how to use github actions instead of less open CICD runners.
 
+![CD](docs/CD.png)
+Our github actions automates the deployment of the website and backend API.
+
 ### Learn more about Azure
 We've had some exposure to Azure but not a huge amount, so we wanted to learn more about how it worked and how we could
 incorporate it into our personal projects.
@@ -178,12 +202,6 @@ incorporate it into our personal projects.
 As a result of the things Stephen learnt on this project he ended up completing his [Azure Certified Developer Associate Certificate](https://www.credly.com/badges/a50a6ac7-486d-40a4-84a7-b8c9e783ec5c?source=linked_in_profile).
 
 ![Developer Associate](docs/DeveloperAssociate.png)
-## What's next for Lyngua
-TODO
-
-
----
-
 
 ## Build Instructions
 ### Installing build tools
@@ -191,13 +209,12 @@ TODO
 * [Install Docker](https://docs.docker.com/get-docker/)
 * [Install Python3.8](https://www.python.org/downloads/)
 * [Install Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
-* Azure CLI
-* Environment Variables used by commands
 
-$AZURE_LOCATION = westus
-$AZURE_RG_NAME = lyngua_rg
-$AZURE_WEB_STORAGE = WebsiteStoarage
-$AZURE_BLOB_STORAGE = LynguaBlobStorage
+These build instructions will reference the following common variables. You might choose to set these either with [windows]() or [linux]()
+* $AZURE_LOCATION = westus
+* $AZURE_RG_NAME = lyngua_rg
+* $AZURE_WEB_STORAGE = WebsiteStoarage
+* $AZURE_BLOB_STORAGE = LynguaBlobStorage
 ### Setting up Infrastructure
 ### Set up your resource group
 The resource group is the "container" that holds all the various azure resource you're going to create.
@@ -270,7 +287,20 @@ az webapp create --resource-group $AZURE_RG_NAME --plan myAPI --name myWebAPP \
 --deployment-container-image-name stephenmo/lyngua:latest
 ```
 
-You should be able to test whether it's working by visiting the url/docs
+Add the required environment variables that will help load configuration settings into your docker container
+* AZURE_SPEECH_API_KEY -> The API key for your speech API
+* AZURE_SPEECH_ENDPOINT -> Will be in the form ```https://{region}.stt.speech.microsoft.com```
+* AZURE_STORAGE_CONNECTION_STRING -> Connection string from a previous step
+* AZURE_TRANSLATE_KEY -> The API key for your translate API
+```
+az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp \
+--settings AZURE_SPEECH_API_KEY={YOUR VALUE} \
+--settings AZURE_SPEECH_ENDPOINT={YOUR VALUE} \
+--settings AZURE_STORAGE_CONNECTION_STRING={YOUR VALUE} \
+--settings AZURE_TRANSLATE_KEY={YOUR VALUE}
+```
+
+You should be able to test whether it's working by visiting the {your_url}/docs
 ``` 
 az webapp list --query "[].{hostName: defaultHostName, state: state}"
 ```
@@ -318,11 +348,6 @@ az cdn endpoint rule add -g $AZURE_RG_NAME --name myCDNEndpoint --profile-name m
 --redirect-protocol Https --redirect-type Moved
 ```
 
-### Set up CORS
-CORS (Cross Origin Resource Sharing) is a way of RICO EXPLAIN.
-For purpose of showing this off and giving developers a chance to look at all aspects of this, we're doing something you 
-normally wouldn't do in production (allowing all origins.)
-
 ### Website
 A bash script ```build.sh``` has been added to ```app/``` to automate the running of the commands.
 For this to work locally you will need an environment variable called VUE_APP_API_URL with the URL of your API.
@@ -358,9 +383,18 @@ There are a few places that our CICD pipelines could be improved
     abort on this case. We would like to try rerunning the request again with the audio trimmed as we have found that 
     videos commonly have a non speech music intro that causes our request to fail.
     
-### Azure Resources
+### Provisioning Azure Resources
 Currently our deployment process involves running a set of CLI commands. This could be improved with
 [Azure Resource Manager (ARM) Templates](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/overview).
+
+
+## What's next for Lyngua
+TODO
+
+
+---
+
+
 
 ## License
 
@@ -368,4 +402,6 @@ MIT, see [LICENSE.txt](LICENSE.txt).
 
 ## References
 Here are a list of non Microsoft/Azure references that we used:
-[Telstra Purple - Host Static Website in Azure storage using Azure CLI](https://purple.telstra.com/blog/host-your-static-website-in-azure-storage-using-azure-cli)
+* [Telstra Purple - Host Static Website in Azure storage using Azure CLI](https://purple.telstra.com/blog/host-your-static-website-in-azure-storage-using-azure-cli)
+* [Build and push Docker images (github actions)](https://github.com/marketplace/actions/build-and-push-docker-images)
+* 
